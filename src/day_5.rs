@@ -1,5 +1,8 @@
 pub fn is_nice(input: &str) -> bool {
-    return false;
+    return
+    	contains_three_vowels(input) &&
+    	contains_a_double_character(input) &&
+    	does_not_contain_offending_string(input);
 }
 
 pub fn contains_three_vowels(input: &str) -> bool {
