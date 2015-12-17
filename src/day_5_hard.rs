@@ -25,7 +25,21 @@ pub fn contains_two_nonoverlapping_pairs(input: &str) -> bool {
 pub fn contains_one_triplet(input: &str) -> bool {
     // It contains at least one letter which repeats with exactly one letter between them, like xyx,
     // abcdefeghi (efe), or even aaa.
-    return false;
+
+    let mut chars = input.chars();
+    let mut chars_compare = input.chars().skip(2);
+
+    let limit = input.len() - 2;
+    for x in 0..limit {
+        let l = chars.next();
+        let r = chars_compare.next();
+
+        if l == r {
+            return true;
+        }
+    }
+    
+    false
 }
 
 #[cfg(test)]
@@ -69,6 +83,6 @@ mod test {
 
     #[test]
     fn does_not_contain_one_triplet_2() {
-        assert_eq!(true, contains_one_triplet(&"abcde"));
+        assert_eq!(false, contains_one_triplet(&"abcde"));
     }
 }
