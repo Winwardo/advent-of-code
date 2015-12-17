@@ -1,0 +1,6 @@
+[package]
+name = "io_topher_advent_of_code"
+version = "0.1.0"
+authors = ["Topher Winward <hi@topher.io>"]
+
+[dependencies]
