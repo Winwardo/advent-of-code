@@ -13,6 +13,18 @@ pub fn count_nice_strings(strings: Vec<String>) -> usize {
 }
 
 pub fn is_nice(input: &str) -> bool {
+    return contains_two_nonoverlapping_pairs(input) && contains_one_triplet(input);
+}
+
+pub fn contains_two_nonoverlapping_pairs(input: &str) -> bool {
+    // It contains a pair of any two letters that appears at least twice in the string without
+    // overlapping, like xyxy (xy) or aabcdefgaa (aa), but not like aaa (aa, but it overlaps).
+    return false;
+}
+
+pub fn contains_one_triplet(input: &str) -> bool {
+    // It contains at least one letter which repeats with exactly one letter between them, like xyx,
+    // abcdefeghi (efe), or even aaa.
     return false;
 }
 
@@ -40,6 +52,23 @@ mod test {
         assert_eq!(false, is_nice(&"ieodomkazucvgmuy"));
     }
 
-    // #[test]
-    
+    #[test]
+    fn does_contain_one_triplet_1() {
+        assert_eq!(true, contains_one_triplet(&"xyx"));
+    }
+
+    #[test]
+    fn does_contain_one_triplet_2() {
+        assert_eq!(true, contains_one_triplet(&"abcdefeghi"));
+    }
+
+    #[test]
+    fn does_contain_one_triplet_3() {
+        assert_eq!(true, contains_one_triplet(&"aaa"));
+    }
+
+    #[test]
+    fn does_not_contain_one_triplet_2() {
+        assert_eq!(true, contains_one_triplet(&"abcde"));
+    }
 }
