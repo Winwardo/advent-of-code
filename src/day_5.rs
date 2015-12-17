@@ -19,6 +19,15 @@ pub fn contains_a_double_character(input: &str) -> bool {
     return false;
 }
 
+pub fn does_not_contain_offending_string(input: &str) -> bool {
+	return !(
+		input.contains("ab") ||
+		input.contains("cd") ||
+		input.contains("pq") ||
+		input.contains("xy")
+	);
+}
+
 pub fn vowel_count(input: &str) -> u8 {
     let mut count = 0;
     for c in input.chars() {
@@ -142,5 +151,23 @@ mod test {
     #[test]
     fn does_not_contain_a_double_character_1() {
         assert_eq!(false, contains_a_double_character(&"abcde"));
+    }
+
+    #[test]
+    fn does_contain_offending_string_all() {
+    	assert_eq!(false, does_not_contain_offending_string(&("ab")));
+    	assert_eq!(false, does_not_contain_offending_string(&("cd")));
+    	assert_eq!(false, does_not_contain_offending_string(&("pq")));
+    	assert_eq!(false, does_not_contain_offending_string(&("xy")));
+    }
+
+    #[test]
+    fn does_contain_offending_string_1() {
+    	assert_eq!(false, does_not_contain_offending_string(&("some_long_string_with_ab_in_it")));
+    }
+
+    #[test]
+    fn does_not_contain_offending_string_1() {
+    	assert_eq!(true, does_not_contain_offending_string(&("some_safe_string")));
     }
 }
