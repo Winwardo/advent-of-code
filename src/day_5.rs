@@ -1,8 +1,20 @@
+pub fn print_basic_answer() {
+    use file_reading::*;
+
+    let input = read_file_as_lines("res\\day_5.txt");
+    let answer = count_nice_strings(input);
+
+
+    println!("{:?}", answer);
+}
+
+pub fn count_nice_strings(strings: Vec<String>) -> usize {
+    return strings.iter().filter(|x| is_nice(&x)).count();
+}
+
 pub fn is_nice(input: &str) -> bool {
-    return
-    	contains_three_vowels(input) &&
-    	contains_a_double_character(input) &&
-    	does_not_contain_offending_string(input);
+    return contains_three_vowels(input) && contains_a_double_character(input) &&
+           does_not_contain_offending_string(input);
 }
 
 pub fn contains_three_vowels(input: &str) -> bool {
@@ -10,25 +22,21 @@ pub fn contains_three_vowels(input: &str) -> bool {
 }
 
 pub fn contains_a_double_character(input: &str) -> bool {
-	let mut last : char = '\x00';
-    for c in input.chars(){
-    	if c == last {
-    		return true;
-    	} else {
-    		last = c;
-    	}
+    let mut last: char = '\x00';
+    for c in input.chars() {
+        if c == last {
+            return true;
+        } else {
+            last = c;
+        }
     }
 
     return false;
 }
 
 pub fn does_not_contain_offending_string(input: &str) -> bool {
-	return !(
-		input.contains("ab") ||
-		input.contains("cd") ||
-		input.contains("pq") ||
-		input.contains("xy")
-	);
+    return !(input.contains("ab") || input.contains("cd") || input.contains("pq") ||
+             input.contains("xy"));
 }
 
 pub fn vowel_count(input: &str) -> u8 {
@@ -158,19 +166,21 @@ mod test {
 
     #[test]
     fn does_contain_offending_string_all() {
-    	assert_eq!(false, does_not_contain_offending_string(&("ab")));
-    	assert_eq!(false, does_not_contain_offending_string(&("cd")));
-    	assert_eq!(false, does_not_contain_offending_string(&("pq")));
-    	assert_eq!(false, does_not_contain_offending_string(&("xy")));
+        assert_eq!(false, does_not_contain_offending_string(&("ab")));
+        assert_eq!(false, does_not_contain_offending_string(&("cd")));
+        assert_eq!(false, does_not_contain_offending_string(&("pq")));
+        assert_eq!(false, does_not_contain_offending_string(&("xy")));
     }
 
     #[test]
     fn does_contain_offending_string_1() {
-    	assert_eq!(false, does_not_contain_offending_string(&("some_long_string_with_ab_in_it")));
+        assert_eq!(false,
+                   does_not_contain_offending_string(&("some_long_string_with_ab_in_it")));
     }
 
     #[test]
     fn does_not_contain_offending_string_1() {
-    	assert_eq!(true, does_not_contain_offending_string(&("some_safe_string")));
+        assert_eq!(true,
+                   does_not_contain_offending_string(&("some_safe_string")));
     }
 }
