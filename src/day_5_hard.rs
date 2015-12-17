@@ -1,4 +1,4 @@
-pub fn print_basic_answer() {
+pub fn print_hard_answer() {
     use file_reading::*;
 
     let input = read_file_as_lines("res\\day_5.txt");
@@ -23,6 +23,10 @@ pub fn contains_two_nonoverlapping_pairs(input: &str) -> bool {
     let mut chars_plus_one = input.chars().skip(1);
 
     let limit = input.len();
+    if limit < 3 {
+        return false;
+    }
+
     for _ in 0..(limit - 3) {
         let l1 = chars.next();
         let r1 = chars_plus_one.next();
