@@ -100,21 +100,25 @@ impl Circuit {
             }
             // Two spaces must be a binary operator
             3 => {
-                let left = self.get(split.next().unwrap());
+                let left_ = self.attempt_reduce(split.next().unwrap());
                 let operator = split.next().unwrap();
-                let p = split.next();
-                let w = p.unwrap();
-                let right = self.get(w);
+                let right_ = self.attempt_reduce(split.next().unwrap());
+
+                if left_.is_none() { return None; }
+                if right_.is_none() { return None; }
+
+                let left = left_.unwrap();
+                let right = right_.unwrap();
 
                 let result = match operator {
                     "AND" => left & right,
                     "OR" => left | right,
                     "LSHIFT" => left << right,
                     "RSHIFT" => left >> right,
-                    _ => 0,
+                    _ => return None,
                 };
 
-                None
+                Some(result)
             }
             _ => None,
         }
