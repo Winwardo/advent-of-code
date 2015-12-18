@@ -1,3 +1,5 @@
+extern crate regex;
+
 mod file_reading;
 
 mod day_5;
