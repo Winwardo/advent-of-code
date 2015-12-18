@@ -50,7 +50,7 @@ impl Circuit {
 
                 match operator {
                     "AND" => left & right,
-
+                    "OR" => left | right,
                     _ => 0,
                 }
             }
@@ -98,11 +98,20 @@ mod test {
     }
 
     #[test]
-    fn set_x_using_AND() {
+    fn set_d_using_AND() {
         let mut circuit = Circuit::new();
         circuit.run_instruction("123 -> x");
         circuit.run_instruction("456 -> y");
         circuit.run_instruction("x AND y -> d");
         assert_eq!(72, circuit.get("d"));
+    }
+
+    #[test]
+    fn set_d_using_OR() {
+        let mut circuit = Circuit::new();
+        circuit.run_instruction("123 -> x");
+        circuit.run_instruction("456 -> y");
+        circuit.run_instruction("x OR y -> d");
+        assert_eq!(507, circuit.get("d"));
     }
 }
