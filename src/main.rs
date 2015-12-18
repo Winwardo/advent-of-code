@@ -7,5 +7,5 @@ mod day_5_hard;
 mod day_6;
 
 pub fn main() {
-    day_5_hard::print_hard_answer();
+    day_6::print_answer();
 }

@@ -1,5 +1,20 @@
 use regex::Regex;
 
+pub fn print_answer() {
+    use file_reading::*;
+
+    let input = read_file_as_lines("res\\day_6.txt");
+
+    let mut lights = Lights::new();
+
+    for line in input {
+        lights.give_instruction(&line);
+    }    
+
+    let answer = lights.turned_on();
+    println!("{:?}", answer);
+}
+
 pub struct Lights {
     lights: Vec<bool>,
 }
