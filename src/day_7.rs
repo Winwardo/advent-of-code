@@ -113,32 +113,32 @@ impl Circuit {
                 };
 
             }
-            // // Two spaces must be a binary operator
-            // 3 => {
-            //     let left_ = self.attempt_reduce(split.next().unwrap());
-            //     let operator = split.next().unwrap();
-            //     let right_ = self.attempt_reduce(split.next().unwrap());
-            //
-            //     if left_.is_none() {
-            //         return None;
-            //     }
-            //     if right_.is_none() {
-            //         return None;
-            //     }
-            //
-            //     let left = left_.unwrap();
-            //     let right = right_.unwrap();
-            //
-            //     let result = match operator {
-            //         "AND" => left & right,
-            //         "OR" => left | right,
-            //         "LSHIFT" => left << right,
-            //         "RSHIFT" => left >> right,
-            //         _ => return None,
-            //     };
-            //
-            //     Some(result)
-            // }
+            // Two spaces must be a binary operator
+            3 => {
+                let left_ = self.resolve_and_memoize(split.next().unwrap());
+                let operator = split.next().unwrap();
+                let right_ = self.resolve_and_memoize(split.next().unwrap());
+            
+                if left_.is_none() {
+                    return None;
+                }
+                if right_.is_none() {
+                    return None;
+                }
+            
+                let left = left_.unwrap();
+                let right = right_.unwrap();
+            
+                let result = match operator {
+                    "AND" => left & right,
+                    "OR" => left | right,
+                    "LSHIFT" => left << right,
+                    "RSHIFT" => left >> right,
+                    _ => 0,
+                };
+
+                return Some(result);
+            }
             _ => {}
         }
 
