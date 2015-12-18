@@ -21,15 +21,15 @@ pub fn print_answer() {
 }
 
 pub struct Circuit {
-    wires2: HashMap<String, String>,
-    wire_vals: HashMap<String, u16>,
+    gates: HashMap<String, String>,
+    computed_wire_results: HashMap<String, u16>,
 }
 
 impl Circuit {
     pub fn new() -> Circuit {
         Circuit {
-            wires2: HashMap::new(),
-            wire_vals: HashMap::new(),
+            gates: HashMap::new(),
+            computed_wire_results: HashMap::new(),
         }
     }
 
@@ -47,32 +47,21 @@ impl Circuit {
             let lhs = cap.at(1).unwrap();
             let rhs = cap.at(2).unwrap();
 
-            // self.set_val(lhs, rhs);
-
-
-            self.wires2.insert(rhs.to_string(), lhs.to_string());
-
-            // Try to memoize
-
-            // match self.attempt_reduce(lhs) {
-            // Some(x) => {
-            // self.wire_vals.insert(rhs.to_string(), x);
-            // }
-            // _ => {}
-            // };
+            self.gates.insert(rhs.to_string(), lhs.to_string());
         }
     }
 
     fn resolve_and_memoize(&mut self, variable_name: &str) -> Option<u16> {
         // Try to return the memoized value
-        match self.wire_vals.get(variable_name) {
+        match self.computed_wire_results.get(variable_name) {
             Some(x) => return Some(*x),
             None => {}
         }
 
+        // Else just resolve the value and return that instead
         match self.resolve(variable_name) {
             Some(x) => {
-                self.wire_vals.insert(variable_name.to_string(), x);
+                self.computed_wire_results.insert(variable_name.to_string(), x);
                 Some(x)
             }
             None => None,
@@ -80,24 +69,28 @@ impl Circuit {
     }
 
     fn resolve(&mut self, variable_name: &str) -> Option<u16> {
-        let definition = match self.wires2.get(variable_name) {
-            Some(x) => x.clone(),
-            _ => variable_name.to_string(),
-        };
-
-        let mut result = None;
+        let definition = self.resolve_definition(&variable_name);
 
         // Test for as a single u16 definition
-        result = match definition.parse::<u16>() {
-            Ok(x) => Some(x),
-            Err(e) => None,
+        match definition.parse::<u16>() {
+            Ok(x) => {
+                return Some(x);
+            }
+            Err(e) => {}
         };
-        if result.is_some() {
-            return result;
-        }
-
 
         // Split up and try operators
+        return self.resolve_by_splitting(&definition);
+    }
+
+    fn resolve_definition(&self, variable_name: &str) -> String {
+        match self.gates.get(variable_name) {
+            Some(x) => x.clone(),
+            _ => variable_name.to_string(),
+        }
+    }
+
+    fn resolve_by_splitting(&mut self, definition: &str) -> Option<u16> {
         let mut split = definition.split(" ");
         match split.clone().count() {
             // No space (one chunk) means it's a variable assignment
@@ -118,17 +111,17 @@ impl Circuit {
                 let left_ = self.resolve_and_memoize(split.next().unwrap());
                 let operator = split.next().unwrap();
                 let right_ = self.resolve_and_memoize(split.next().unwrap());
-            
+
                 if left_.is_none() {
                     return None;
                 }
                 if right_.is_none() {
                     return None;
                 }
-            
+
                 let left = left_.unwrap();
                 let right = right_.unwrap();
-            
+
                 let result = match operator {
                     "AND" => left & right,
                     "OR" => left | right,
@@ -142,74 +135,7 @@ impl Circuit {
             _ => {}
         }
 
-
         None
-    }
-
-    fn attempt_reduce(&self, to_reduce: &str) -> Option<u16> {
-        // println!("{:?}", to_reduce);
-        // Test if we're just a simple number assignment
-        match to_reduce.parse::<u16>() {
-            Ok(x) => {
-                return Some(x);
-            }
-            _ => {}
-        };
-
-        // Split up and try operators
-        let mut split = to_reduce.split(" ");
-        match split.clone().count() {
-            // No space (one chunk) means it's a variable assignment
-            1 => {
-                match self.wire_vals.get(to_reduce) {
-                    Some(x) => Some(*x),
-                    _ => {
-                        let next_level = self.wires2.get(to_reduce);
-                        match next_level {
-                            Some(x) => {
-                                return self.attempt_reduce(x);
-                            }
-                            _ => None,
-                        }
-                    }
-                }
-            }
-            // One space is a unary operator, and must be NOT
-            2 => {
-                let num = split.skip(1).next().unwrap();
-                match self.attempt_reduce(num) {
-                    Some(x) => Some(!x),
-                    _ => None,
-                }
-            }
-            // Two spaces must be a binary operator
-            3 => {
-                let left_ = self.attempt_reduce(split.next().unwrap());
-                let operator = split.next().unwrap();
-                let right_ = self.attempt_reduce(split.next().unwrap());
-
-                if left_.is_none() {
-                    return None;
-                }
-                if right_.is_none() {
-                    return None;
-                }
-
-                let left = left_.unwrap();
-                let right = right_.unwrap();
-
-                let result = match operator {
-                    "AND" => left & right,
-                    "OR" => left | right,
-                    "LSHIFT" => left << right,
-                    "RSHIFT" => left >> right,
-                    _ => return None,
-                };
-
-                Some(result)
-            }
-            _ => None,
-        }
     }
 }
 
