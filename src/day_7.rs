@@ -51,6 +51,8 @@ impl Circuit {
                 match operator {
                     "AND" => left & right,
                     "OR" => left | right,
+                    "LSHIFT" => left << right,
+                    "RSHIFT" => left >> right,
                     _ => 0,
                 }
             }
@@ -82,6 +84,13 @@ mod test {
     }
 
     #[test]
+    fn set_xy_is_123() {
+        let mut circuit = Circuit::new();
+        circuit.run_instruction("123 -> xy");
+        assert_eq!(123, circuit.get("xy"));
+    }
+
+    #[test]
     fn set_x_is_123_then_overwrite() {
         let mut circuit = Circuit::new();
         circuit.run_instruction("123 -> x");
@@ -107,11 +116,35 @@ mod test {
     }
 
     #[test]
-    fn set_d_using_OR() {
+    fn set_e_using_OR() {
         let mut circuit = Circuit::new();
         circuit.run_instruction("123 -> x");
         circuit.run_instruction("456 -> y");
-        circuit.run_instruction("x OR y -> d");
-        assert_eq!(507, circuit.get("d"));
+        circuit.run_instruction("x OR y -> e");
+        assert_eq!(507, circuit.get("e"));
+    }
+
+    #[test]
+    fn set_f_using_LSHIFT() {
+        let mut circuit = Circuit::new();
+        circuit.run_instruction("123 -> x");
+        circuit.run_instruction("x LSHIFT 2 -> f");
+        assert_eq!(492, circuit.get("f"));
+    }
+
+    #[test]
+    fn set_g_using_RSHIFT() {
+        let mut circuit = Circuit::new();
+        circuit.run_instruction("456 -> y");
+        circuit.run_instruction("y RSHIFT 2 -> g");
+        assert_eq!(114, circuit.get("g"));
+    }
+
+    #[test]
+    fn set_h_using_NOT() {
+        let mut circuit = Circuit::new();
+        circuit.run_instruction("123 -> x");
+        circuit.run_instruction("NOT x -> h");
+        assert_eq!(65412, circuit.get("h"));
     }
 }
