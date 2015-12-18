@@ -34,21 +34,11 @@ impl Circuit {
     }
 
     pub fn get(&mut self, key: &str) -> u16 {
-        self.resolve_and_memoize(key);
-
         // Check memoization list
-        match self.wire_vals.get_mut(key) {
-            Some(x) => return *x,
+        match self.resolve_and_memoize(key) {
+            Some(x) => return x,
             _ => panic!("Unable to resolve"),
         }
-
-
-        // let to_reduce = self.wires2.get(key).unwrap();
-        // println!("key: {:?}, to_reduce: {:?}", key, to_reduce);
-        // match self.attempt_reduce(to_reduce) {
-        //     Some(x) => x,
-        //     _ => panic!("Poo"),
-        // }
     }
 
     pub fn run_instruction(&mut self, instruction: &str) {
@@ -89,21 +79,71 @@ impl Circuit {
         }
     }
 
-    fn resolve(&self, variable_name: &str) -> Option<u16> {
+    fn resolve(&mut self, variable_name: &str) -> Option<u16> {
         let definition = match self.wires2.get(variable_name) {
-            Some(x) => x,
+            Some(x) => x.clone(),
             _ => panic!("Variable name not found."),
         };
 
         let mut result = None;
 
+        // Test for as a single u16 definition
         result = match definition.parse::<u16>() {
             Ok(x) => Some(x),
             _ => None,
         };
+        if result.is_some() {
+            return result;
+        }
 
 
-        result
+        // Split up and try operators
+        let mut split = definition.split(" ");
+        match split.clone().count() {
+            // No space (one chunk) means it's a variable assignment
+            1 => {
+                return self.resolve_and_memoize(&definition);
+            }
+
+            // // One space is a unary operator, and must be NOT
+            // 2 => {
+            //     let num = split.skip(1).next().unwrap();
+            //     match self.attempt_reduce(num) {
+            //         Some(x) => Some(!x),
+            //         _ => None,
+            //     }
+            // }
+            // // Two spaces must be a binary operator
+            // 3 => {
+            //     let left_ = self.attempt_reduce(split.next().unwrap());
+            //     let operator = split.next().unwrap();
+            //     let right_ = self.attempt_reduce(split.next().unwrap());
+            //
+            //     if left_.is_none() {
+            //         return None;
+            //     }
+            //     if right_.is_none() {
+            //         return None;
+            //     }
+            //
+            //     let left = left_.unwrap();
+            //     let right = right_.unwrap();
+            //
+            //     let result = match operator {
+            //         "AND" => left & right,
+            //         "OR" => left | right,
+            //         "LSHIFT" => left << right,
+            //         "RSHIFT" => left >> right,
+            //         _ => return None,
+            //     };
+            //
+            //     Some(result)
+            // }
+            _ => {},
+        }
+
+
+        None
     }
 
     fn attempt_reduce(&self, to_reduce: &str) -> Option<u16> {
@@ -125,7 +165,7 @@ impl Circuit {
                     Some(x) => Some(*x),
                     _ => {
                         let next_level = self.wires2.get(to_reduce);
-                        match (next_level) {
+                        match next_level {
                             Some(x) => {
                                 return self.attempt_reduce(x);
                             }
