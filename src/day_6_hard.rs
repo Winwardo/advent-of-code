@@ -10,7 +10,7 @@ pub fn print_answer() {
 
     for line in input {
         lights.give_instruction(&line);
-    }    
+    }
 
     let answer = lights.turned_on();
     println!("{:?}", answer);
@@ -60,7 +60,7 @@ impl Lights {
         self.add_at_group(start, end, -1);
     }
 
-    fn toggle(&mut self, start: (u32, u32), end: (u32, u32)) {        
+    fn toggle(&mut self, start: (u32, u32), end: (u32, u32)) {
         self.add_at_group(start, end, 2);
     }
 

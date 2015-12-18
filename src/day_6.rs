@@ -9,7 +9,7 @@ pub fn print_answer() {
 
     for line in input {
         lights.give_instruction(&line);
-    }    
+    }
 
     let answer = lights.turned_on();
     println!("{:?}", answer);
