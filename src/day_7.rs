@@ -1,6 +1,22 @@
 use regex::Regex;
 use std::collections::HashMap;
 
+pub fn print_answer() {
+    use file_reading::*;
+    let input = read_file_as_lines("res\\day_7.txt");
+
+    let mut circuit = Circuit::new();
+
+    for line in input {
+        println!("{:?}", line);
+        circuit.run_instruction(&line);
+        println!("{:?}", circuit.get("lx"));
+    }
+
+    let answer = circuit.get("a");
+    println!("{:?}", answer);
+}
+
 pub struct Circuit {
     wires: HashMap<String, u16>,
 }
