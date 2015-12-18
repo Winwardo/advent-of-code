@@ -8,10 +8,12 @@ pub fn print_answer() {
     let mut circuit = Circuit::new();
 
     for line in input {
-        // println!("{:?}", line);
+        println!("{:?}", line);
         circuit.run_instruction(&line);
         // println!("{:?}", circuit.get("lx"));
     }
+
+    println!("Instructions entered");
 
     // let answer = 7;
     let answer = circuit.get("a");
@@ -37,17 +39,18 @@ impl Circuit {
             match self.wire_vals.get_mut(key) {
                 Some(x) => return *x,
                 _ => {}
-            };
-        }
-        {
-            // let to_reduce = self.wires2.get_mut(key).unwrap();
-            // match self.attempt_reduce(to_reduce) {
-                // Some(x) => return x,
-                // _ => panic!("WHAT"),
-            // };
-        }
+            }
 
-        13
+
+            let to_reduce = self.wires2.get(key).unwrap();
+            println!("key: {:?}, to_reduce: {:?}", key, to_reduce);
+            match self.attempt_reduce(to_reduce) {
+                Some(x) => x,
+                _ => panic!("Poo"),
+            }
+
+// 3
+        }
     }
 
     pub fn run_instruction(&mut self, instruction: &str) {
@@ -71,7 +74,8 @@ impl Circuit {
         }
     }
 
-    fn attempt_reduce(&mut self, to_reduce: &str) -> Option<u16> {
+    fn attempt_reduce(&self, to_reduce: &str) -> Option<u16> {
+        // println!("{:?}", to_reduce);
         // Test if we're just a simple number assignment
         match to_reduce.parse::<u16>() {
             Ok(x) => {
@@ -87,7 +91,13 @@ impl Circuit {
             1 => {
                 match self.wire_vals.get(to_reduce) {
                     Some(x) => Some(*x),
-                    _ => None,
+                    _ => {
+                        let next_level = self.wires2.get(to_reduce);
+                        match (next_level) {
+                            Some(x) => { return self.attempt_reduce(x); },
+                            _ => None,
+                        }
+                    },
                 }
             }
             // One space is a unary operator, and must be NOT
@@ -104,8 +114,12 @@ impl Circuit {
                 let operator = split.next().unwrap();
                 let right_ = self.attempt_reduce(split.next().unwrap());
 
-                if left_.is_none() { return None; }
-                if right_.is_none() { return None; }
+                if left_.is_none() {
+                    return None;
+                }
+                if right_.is_none() {
+                    return None;
+                }
 
                 let left = left_.unwrap();
                 let right = right_.unwrap();
@@ -121,44 +135,6 @@ impl Circuit {
                 Some(result)
             }
             _ => None,
-        }
-    }
-
-    fn get_actual_value(&mut self, given_value: &str) -> u16 {
-
-
-
-        // println!("a");
-        // let r = self.wires2.get(given_value).unwrap();
-
-        // println!("{:?} = {:?}", given_value, r);
-
-
-
-        let mut split = given_value.split(" ");
-        // println!("count {:?}", split.clone().count());
-        match split.clone().count() {
-            // No space (one chunk) means it's a variable assignment
-            1 => self.get(given_value),
-            // One space is a unary operator, and must be NOT
-            2 => !self.get(split.skip(1).next().unwrap()),
-            // Two spaces must be a binary operator
-            3 => {
-                let left = self.get(split.next().unwrap());
-                let operator = split.next().unwrap();
-                let p = split.next();
-                let w = p.unwrap();
-                let right = self.get(w);
-
-                match operator {
-                    "AND" => left & right,
-                    "OR" => left | right,
-                    "LSHIFT" => left << right,
-                    "RSHIFT" => left >> right,
-                    _ => 0,
-                }
-            }
-            _ => 0,
         }
     }
 }
@@ -244,5 +220,14 @@ mod test {
         circuit.run_instruction("123 -> x");
         circuit.run_instruction("NOT x -> h");
         assert_eq!(65412, circuit.get("h"));
+    }    
+
+    #[test]
+    fn set_h_wire_in_reverse() {
+        let mut circuit = Circuit::new();
+        circuit.run_instruction("y -> h");
+        circuit.run_instruction("x -> y");
+        circuit.run_instruction("123 -> x");
+        assert_eq!(123, circuit.get("h"));
     }
 }
