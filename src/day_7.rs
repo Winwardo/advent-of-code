@@ -34,23 +34,21 @@ impl Circuit {
     }
 
     pub fn get(&mut self, key: &str) -> u16 {
-        {
-            // Check memoization list
-            match self.wire_vals.get_mut(key) {
-                Some(x) => return *x,
-                _ => {}
-            }
+        self.resolve_and_memoize(key);
 
-
-            let to_reduce = self.wires2.get(key).unwrap();
-            println!("key: {:?}, to_reduce: {:?}", key, to_reduce);
-            match self.attempt_reduce(to_reduce) {
-                Some(x) => x,
-                _ => panic!("Poo"),
-            }
-
-// 3
+        // Check memoization list
+        match self.wire_vals.get_mut(key) {
+            Some(x) => return *x,
+            _ => panic!("Unable to resolve"),
         }
+
+
+        // let to_reduce = self.wires2.get(key).unwrap();
+        // println!("key: {:?}, to_reduce: {:?}", key, to_reduce);
+        // match self.attempt_reduce(to_reduce) {
+        //     Some(x) => x,
+        //     _ => panic!("Poo"),
+        // }
     }
 
     pub fn run_instruction(&mut self, instruction: &str) {
@@ -65,13 +63,47 @@ impl Circuit {
             self.wires2.insert(rhs.to_string(), lhs.to_string());
 
             // Try to memoize
-            match self.attempt_reduce(lhs) {
-                Some(x) => {
-                    self.wire_vals.insert(rhs.to_string(), x);
-                }
-                _ => {}
-            };
+
+            // match self.attempt_reduce(lhs) {
+            // Some(x) => {
+            // self.wire_vals.insert(rhs.to_string(), x);
+            // }
+            // _ => {}
+            // };
         }
+    }
+
+    fn resolve_and_memoize(&mut self, variable_name: &str) -> Option<u16> {
+        // Try to return the memoized value
+        match self.wire_vals.get(variable_name) {
+            Some(x) => return Some(*x),
+            _ => {}
+        }
+
+        match self.resolve(variable_name) {
+            Some(x) => {
+                self.wire_vals.insert(variable_name.to_string(), x);
+                Some(x)
+            }
+            _ => None,
+        }
+    }
+
+    fn resolve(&self, variable_name: &str) -> Option<u16> {
+        let definition = match self.wires2.get(variable_name) {
+            Some(x) => x,
+            _ => panic!("Variable name not found."),
+        };
+
+        let mut result = None;
+
+        result = match definition.parse::<u16>() {
+            Ok(x) => Some(x),
+            _ => None,
+        };
+
+
+        result
     }
 
     fn attempt_reduce(&self, to_reduce: &str) -> Option<u16> {
@@ -94,10 +126,12 @@ impl Circuit {
                     _ => {
                         let next_level = self.wires2.get(to_reduce);
                         match (next_level) {
-                            Some(x) => { return self.attempt_reduce(x); },
+                            Some(x) => {
+                                return self.attempt_reduce(x);
+                            }
                             _ => None,
                         }
-                    },
+                    }
                 }
             }
             // One space is a unary operator, and must be NOT
@@ -220,7 +254,7 @@ mod test {
         circuit.run_instruction("123 -> x");
         circuit.run_instruction("NOT x -> h");
         assert_eq!(65412, circuit.get("h"));
-    }    
+    }
 
     #[test]
     fn set_h_wire_in_reverse() {
