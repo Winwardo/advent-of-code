@@ -2,7 +2,7 @@ use regex::Regex;
 use std::collections::HashMap;
 
 pub struct Circuit {
-    wires: HashMap<String, u32>,
+    wires: HashMap<String, u16>,
 }
 
 impl Circuit {
@@ -10,7 +10,7 @@ impl Circuit {
         Circuit { wires: HashMap::new() }
     }
 
-    pub fn get(&self, key: &str) -> u32 {
+    pub fn get(&self, key: &str) -> u16 {
         let r = self.wires.get(key);
 
         match r {
@@ -29,9 +29,9 @@ impl Circuit {
         }
     }
 
-    fn get_actual_value(&self, given_value: &str) -> u32 {
+    fn get_actual_value(&self, given_value: &str) -> u16 {
         // Test if we're just a simple number assignment
-        match given_value.parse::<u32>() {
+        match given_value.parse::<u16>() {
             Ok(x) => return x,
             _ => {}
         };
@@ -41,7 +41,7 @@ impl Circuit {
             // No space (one chunk) means it's a variable assignment
             1 => self.get(given_value),
             // One space is a unary operator, and must be NOT
-            2 => 0,
+            2 => !self.get_actual_value(split.skip(1).next().unwrap()),
             // Two spaces must be a binary operator
             3 => {
                 let left = self.get_actual_value(split.next().unwrap());
