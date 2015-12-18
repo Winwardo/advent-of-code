@@ -22,11 +22,17 @@ impl Lights {
             let end = (x2, y2);
 
             match action {
-                "turn off" => { self.turn_off(start, end); },
-                "turn on" => { self.turn_on(start, end); },
-                "toggle" => { self.toggle(start, end); },
-                _ => { panic!("Invalid action.") }
-            } 
+                "turn off" => {
+                    self.turn_off(start, end);
+                }
+                "turn on" => {
+                    self.turn_on(start, end);
+                }
+                "toggle" => {
+                    self.toggle(start, end);
+                }
+                _ => panic!("Invalid action."),
+            }
         }
     }
 
