@@ -30,20 +30,36 @@ impl Circuit {
     }
 
     fn get_actual_value(&self, given_value: &str) -> u32 {
+        // Test if we're just a simple number assignment
         match given_value.parse::<u32>() {
-            Ok(x) => x,
-            Err(e) => 0,
+            Ok(x) => return x,
+            _ => {}
+        };
+
+        let mut split = given_value.split(" ");
+        match split.clone().count() {
+            // No space (one chunk) means it's a variable assignment
+            1 => self.get(given_value),
+            // One space is a unary operator, and must be NOT
+            2 => 0,
+            // Two spaces must be a binary operator
+            3 => {
+                let left = self.get_actual_value(split.next().unwrap());
+                let operator = split.next().unwrap();
+                let right = self.get_actual_value(split.next().unwrap());
+
+                match operator {
+                    "AND" => left & right,
+
+                    _ => 0,
+                }
+            }
+            _ => 0,
         }
     }
 
     fn set_val(&mut self, lhs: &str, wire: &str) {
         let value = self.get_actual_value(lhs);
-        // let q = self.wires.get_mut(wire);
-
-        // match q {
-        // Some(x) => { x += value; },
-        // None => {}
-        // };
         self.wires.insert(wire.to_string(), value);
     }
 }
@@ -79,5 +95,14 @@ mod test {
         circuit.run_instruction("123 -> x");
         circuit.run_instruction("x -> y");
         assert_eq!(123, circuit.get("y"));
+    }
+
+    #[test]
+    fn set_x_using_AND() {
+        let mut circuit = Circuit::new();
+        circuit.run_instruction("123 -> x");
+        circuit.run_instruction("456 -> y");
+        circuit.run_instruction("x AND y -> d");
+        assert_eq!(72, circuit.get("d"));
     }
 }
