@@ -67,7 +67,7 @@ impl Circuit {
         // Try to return the memoized value
         match self.wire_vals.get(variable_name) {
             Some(x) => return Some(*x),
-            _ => {}
+            None => {}
         }
 
         match self.resolve(variable_name) {
@@ -75,14 +75,14 @@ impl Circuit {
                 self.wire_vals.insert(variable_name.to_string(), x);
                 Some(x)
             }
-            _ => None,
+            None => None,
         }
     }
 
     fn resolve(&mut self, variable_name: &str) -> Option<u16> {
         let definition = match self.wires2.get(variable_name) {
             Some(x) => x.clone(),
-            _ => panic!("Variable name not found."),
+            _ => variable_name.to_string(),
         };
 
         let mut result = None;
@@ -90,7 +90,7 @@ impl Circuit {
         // Test for as a single u16 definition
         result = match definition.parse::<u16>() {
             Ok(x) => Some(x),
-            _ => None,
+            Err(e) => None,
         };
         if result.is_some() {
             return result;
@@ -104,15 +104,15 @@ impl Circuit {
             1 => {
                 return self.resolve_and_memoize(&definition);
             }
+            // One space is a unary operator, and must be NOT
+            2 => {
+                let rhs = split.skip(1).next().unwrap();
+                return match self.resolve_and_memoize(rhs) {
+                    Some(x) => Some(!x),
+                    None => None,
+                };
 
-            // // One space is a unary operator, and must be NOT
-            // 2 => {
-            //     let num = split.skip(1).next().unwrap();
-            //     match self.attempt_reduce(num) {
-            //         Some(x) => Some(!x),
-            //         _ => None,
-            //     }
-            // }
+            }
             // // Two spaces must be a binary operator
             // 3 => {
             //     let left_ = self.attempt_reduce(split.next().unwrap());
@@ -139,7 +139,7 @@ impl Circuit {
             //
             //     Some(result)
             // }
-            _ => {},
+            _ => {}
         }
 
 
