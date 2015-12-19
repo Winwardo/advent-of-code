@@ -18,34 +18,20 @@ impl<'a> CharacterCount<'a> {
         assert!(self.characters.chars().rev().next().unwrap() == '"');
 
         let mut count = 0;
-        let mut escape = false;
-        let mut hex = 0;
+        let mut escape = 0;
 
         for c in self.characters.chars() {
-            if hex > 0 {
-                hex -= 1;
-                if hex == 0 {
-                    escape = false;
-                }
-            }
-
-            if escape {
-                match c {
-                    '\\' | '\"' => {
-                        escape = false;
-                        count += 1;
-                    }
-                    'x' => {
-                        hex = 2;
-                    }
-                    _ => {}
+            if escape > 0 {
+                escape -= 1;
+                if escape == 0 && c == 'x' {
+                    escape += 2;
                 }
             } else {
                 if c == '\\' {
-                    escape = true;
-                } else {
-                    count += 1;
+                    escape = 1;
                 }
+
+                count += 1;
             }
         }
         count - 2
