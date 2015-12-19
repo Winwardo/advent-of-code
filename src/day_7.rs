@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 pub fn print_answer() {
     use file_reading::*;
-    let input = read_file_as_lines("res\\day_7.txt");
+    let input = read_file_as_lines("res\\day_7_hard.txt");
 
     let mut circuit = Circuit::new();
 
