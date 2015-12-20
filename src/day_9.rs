@@ -1,18 +1,19 @@
-pub struct Location {
-    name: String,
+#[derive(Copy, Clone)]
+pub struct Location<'a> {
+    name: &'a str,
 }
 
-pub struct Distance {
-    from: Location,
-    to: Location,
+pub struct Distance<'a> {
+    from: Location<'a>,
+    to: Location<'a>,
     distance: u32,
 }
 
-pub struct DistanceGraph {
-    distances: Vec<Distance>,
+pub struct DistanceGraph<'a> {
+    distances: Vec<Distance<'a>>,
 }
 
-impl DistanceGraph {
+impl<'a> DistanceGraph<'a> {
     pub fn shortest_distance(&self) -> u32 {
         if self.distances.len() == 0 {
             return 0;
@@ -47,8 +48,8 @@ mod test {
     fn trivial_case() {
         let d = DistanceGraph {
             distances: vec![Distance {
-                                from: Location { name: "A".to_string() },
-                                to: Location { name: "B".to_string() },
+                                from: Location { name: "A" },
+                                to: Location { name: "B" },
                                 distance: 10,
                             }],
         };
@@ -60,13 +61,13 @@ mod test {
     fn two_connected_lines() {
         let d = DistanceGraph {
             distances: vec![Distance {
-                                from: Location { name: "A".to_string() },
-                                to: Location { name: "B".to_string() },
+                                from: Location { name: "A" },
+                                to: Location { name: "B" },
                                 distance: 10,
                             },
                             Distance {
-                                from: Location { name: "B".to_string() },
-                                to: Location { name: "C".to_string() },
+                                from: Location { name: "B" },
+                                to: Location { name: "C" },
                                 distance: 20,
                             }],
         };
@@ -78,18 +79,18 @@ mod test {
     fn three_connected_lines() {
         let d = DistanceGraph {
             distances: vec![Distance {
-                                from: Location { name: "A".to_string() },
-                                to: Location { name: "B".to_string() },
+                                from: Location { name: "A" },
+                                to: Location { name: "B" },
                                 distance: 10,
                             },
                             Distance {
-                                from: Location { name: "B".to_string() },
-                                to: Location { name: "C".to_string() },
+                                from: Location { name: "B" },
+                                to: Location { name: "C" },
                                 distance: 20,
                             },
                             Distance {
-                                from: Location { name: "C".to_string() },
-                                to: Location { name: "D".to_string() },
+                                from: Location { name: "C" },
+                                to: Location { name: "D" },
                                 distance: 5,
                             }],
         };
@@ -101,18 +102,18 @@ mod test {
     fn three_disjoint_lines() {
         let d = DistanceGraph {
             distances: vec![Distance {
-                                from: Location { name: "A".to_string() },
-                                to: Location { name: "B".to_string() },
+                                from: Location { name: "A" },
+                                to: Location { name: "B" },
                                 distance: 10,
                             },
                             Distance {
-                                from: Location { name: "C".to_string() },
-                                to: Location { name: "D".to_string() },
+                                from: Location { name: "C" },
+                                to: Location { name: "D" },
                                 distance: 20,
                             },
                             Distance {
-                                from: Location { name: "E".to_string() },
-                                to: Location { name: "F".to_string() },
+                                from: Location { name: "E" },
+                                to: Location { name: "F" },
                                 distance: 5,
                             }],
         };
@@ -124,13 +125,13 @@ mod test {
     fn one_place_two_lines() {
         let d = DistanceGraph {
             distances: vec![Distance {
-                                from: Location { name: "A".to_string() },
-                                to: Location { name: "B".to_string() },
+                                from: Location { name: "A" },
+                                to: Location { name: "B" },
                                 distance: 10,
                             },
                             Distance {
-                                from: Location { name: "A".to_string() },
-                                to: Location { name: "C".to_string() },
+                                from: Location { name: "A" },
+                                to: Location { name: "C" },
                                 distance: 7,
                             }],
         };
@@ -141,8 +142,63 @@ mod test {
     #[test]
     fn no_connected_locations() {
         let d = DistanceGraph { distances: vec![] };
-        let test_location = Location { name: "B".to_string() };
+        let test_location = Location { name: "B" };
 
         assert_eq!(0, d.connected_locations(&test_location).len());
+    }
+
+    #[test]
+    fn one_connected_location() {
+        let test_location = Location { name: "A" };
+
+        let d = DistanceGraph {
+            distances: vec![Distance {
+                                from: test_location,
+                                to: Location { name: "B" },
+                                distance: 10,
+                            }],
+        };
+
+        assert_eq!(1, d.connected_locations(&test_location).len());
+    }
+
+    #[test]
+    fn two_connected_locations_one_dud() {
+        let test_location = Location { name: "A" };
+
+        let d = DistanceGraph {
+            distances: vec![Distance {
+                                from: test_location,
+                                to: Location { name: "B" },
+                                distance: 10,
+                            },
+                            Distance {
+                                from: test_location,
+                                to: Location { name: "C" },
+                                distance: 10,
+                            },
+                            Distance {
+                                from: Location { name: "Q" },
+                                to: Location { name: "B" },
+                                distance: 10,
+                            }],
+        };
+
+        assert_eq!(2, d.connected_locations(&test_location).len());
+    }
+
+    #[test]
+    fn one_reverse_connected_location() {
+        let test_location = Location { name: "A" };
+
+        let d = DistanceGraph {
+            distances: vec![Distance {
+                                from: Location { name: "B" },
+                                to: test_location,
+                                distance: 10,
+                            }],
+        };
+
+        assert_eq!(1, d.connected_locations(&test_location).len());
     }
 }
