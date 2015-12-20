@@ -26,6 +26,10 @@ impl DistanceGraph {
         }
         shortest
     }
+
+    pub fn connected_locations(&self, location: &Location) -> Vec<Distance> {
+        vec![]
+    }
 }
 
 #[cfg(test)]
@@ -132,5 +136,13 @@ mod test {
         };
 
         assert_eq!(7, d.shortest_distance());
+    }
+
+    #[test]
+    fn no_connected_locations() {
+        let d = DistanceGraph { distances: vec![] };
+        let test_location = Location { name: "B".to_string() };
+
+        assert_eq!(0, d.connected_locations(&test_location).len());
     }
 }
