@@ -37,7 +37,7 @@ impl<'a> DistanceGraph<'a> {
     pub fn connected_locations(&self, location: &'a Location) -> Vec<&'a Distance> {
         let mut connections: Vec<&'a Distance> = Vec::new();
         for distance in self.distances.iter() {
-            if distance.from == *location {
+            if (distance.from == *location) || (distance.to == *location) {
                 connections.push(distance);
             }
         }
