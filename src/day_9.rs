@@ -51,4 +51,86 @@ mod test {
 
         assert_eq!(10, d.shortest_distance());
     }
+
+    #[test]
+    fn two_connected_lines() {
+        let d = DistanceGraph {
+            distances: vec![Distance {
+                                from: Location { name: "A".to_string() },
+                                to: Location { name: "B".to_string() },
+                                distance: 10,
+                            },
+                            Distance {
+                                from: Location { name: "B".to_string() },
+                                to: Location { name: "C".to_string() },
+                                distance: 20,
+                            }],
+        };
+
+        assert_eq!(30, d.shortest_distance());
+    }
+
+    #[test]
+    fn three_connected_lines() {
+        let d = DistanceGraph {
+            distances: vec![Distance {
+                                from: Location { name: "A".to_string() },
+                                to: Location { name: "B".to_string() },
+                                distance: 10,
+                            },
+                            Distance {
+                                from: Location { name: "B".to_string() },
+                                to: Location { name: "C".to_string() },
+                                distance: 20,
+                            },
+                            Distance {
+                                from: Location { name: "C".to_string() },
+                                to: Location { name: "D".to_string() },
+                                distance: 5,
+                            }],
+        };
+
+        assert_eq!(35, d.shortest_distance());
+    }
+
+    #[test]
+    fn three_disjoint_lines() {
+        let d = DistanceGraph {
+            distances: vec![Distance {
+                                from: Location { name: "A".to_string() },
+                                to: Location { name: "B".to_string() },
+                                distance: 10,
+                            },
+                            Distance {
+                                from: Location { name: "C".to_string() },
+                                to: Location { name: "D".to_string() },
+                                distance: 20,
+                            },
+                            Distance {
+                                from: Location { name: "E".to_string() },
+                                to: Location { name: "F".to_string() },
+                                distance: 5,
+                            }],
+        };
+
+        assert_eq!(5, d.shortest_distance());
+    }
+
+    #[test]
+    fn one_place_two_lines() {
+        let d = DistanceGraph {
+            distances: vec![Distance {
+                                from: Location { name: "A".to_string() },
+                                to: Location { name: "B".to_string() },
+                                distance: 10,
+                            },
+                            Distance {
+                                from: Location { name: "A".to_string() },
+                                to: Location { name: "C".to_string() },
+                                distance: 7,
+                            }],
+        };
+
+        assert_eq!(7, d.shortest_distance());
+    }
 }
