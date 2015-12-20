@@ -3,6 +3,12 @@ pub struct Location<'a> {
     name: &'a str,
 }
 
+impl<'a> PartialEq for Location<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+    }
+}
+
 pub struct Distance<'a> {
     from: Location<'a>,
     to: Location<'a>,
@@ -28,8 +34,14 @@ impl<'a> DistanceGraph<'a> {
         shortest
     }
 
-    pub fn connected_locations(&self, location: &Location) -> Vec<Distance> {
-        vec![]
+    pub fn connected_locations(&self, location: &'a Location) -> Vec<&'a Distance> {
+        let mut connections: Vec<&'a Distance> = Vec::new();
+        for distance in self.distances.iter() {
+            if distance.from == *location {
+                connections.push(distance);
+            }
+        }
+        connections
     }
 }
 
