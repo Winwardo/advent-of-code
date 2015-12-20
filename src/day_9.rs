@@ -111,6 +111,52 @@ mod test {
     }
 
     #[test]
+    fn three_branching_lines_makes_a_Y_shape() {
+        let d = DistanceGraph {
+            distances: vec![Distance {
+                                from: Location { name: "A" },
+                                to: Location { name: "B" },
+                                distance: 10,
+                            },
+                            Distance {
+                                from: Location { name: "B" },
+                                to: Location { name: "C" },
+                                distance: 20,
+                            },
+                            Distance {
+                                from: Location { name: "B" },
+                                to: Location { name: "D" },
+                                distance: 5,
+                            }],
+        };
+
+        assert_eq!(15, d.shortest_distance());
+    }
+
+    #[test]
+    fn lines_as_in_example() {
+        let d = DistanceGraph {
+            distances: vec![Distance {
+                                from: Location { name: "London" },
+                                to: Location { name: "Dublin" },
+                                distance: 464,
+                            },
+                            Distance {
+                                from: Location { name: "London" },
+                                to: Location { name: "Belfast" },
+                                distance: 518,
+                            },
+                            Distance {
+                                from: Location { name: "Dublin" },
+                                to: Location { name: "Belfast" },
+                                distance: 141,
+                            }],
+        };
+
+        assert_eq!(605, d.shortest_distance());
+    }
+
+    #[test]
     fn three_disjoint_lines() {
         let d = DistanceGraph {
             distances: vec![Distance {
