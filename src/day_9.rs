@@ -1,6 +1,6 @@
-use std::collections::VecDeque;
+use std::collections::HashSet;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, Hash)]
 pub struct Location<'a> {
     name: &'a str,
 }
@@ -28,14 +28,36 @@ impl<'a> DistanceGraph<'a> {
         }
 
         let mut shortest = !0; // Infinity
-        let mut queue = VecDeque::new();
+        // let mut queue = VecDeque::new();
 
         // Populate the queue with all initial locations
         for distance in self.distances.iter() {
-            queue.push_back(distance);
+            // for
         }
 
         shortest
+    }
+
+    fn compute_shortest_distance_between(&self, from: &'a Location, to: &'a Location) -> u32 {
+        match self.get_distance(&from, &to) {
+            Some(x) => {
+                return x;
+            }
+            None => {}
+        }
+
+        !0
+    }
+
+    pub fn all_locations(&self) -> HashSet<&'a Location> {
+        let mut set: HashSet<&'a Location> = HashSet::new();
+
+        for distance in self.distances.iter() {
+            set.insert(&distance.from);
+            set.insert(&distance.to);
+        }
+
+        set
     }
 
     pub fn connected_locations(&self, location: &'a Location) -> Vec<&'a Distance> {
@@ -48,19 +70,20 @@ impl<'a> DistanceGraph<'a> {
         connections
     }
 
-    pub fn get_distance(&self, from: &'a Location, to: &'a Location) -> u32 {
+    pub fn get_distance(&self, from: &'a Location, to: &'a Location) -> Option<u32> {
         for distance in self.connected_locations(&from) {
             if (distance.from == *to) || (distance.to == *to) {
-                return distance.distance;
+                return Some(distance.distance);
             }
         }
-        panic!("Non existent distance");
+        None
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::collections::HashSet;
 
     #[test]
     fn empty_case() {
@@ -250,6 +273,36 @@ mod test {
                             }],
         };
 
-        assert_eq!(141, d.get_distance(&belfast, &dublin));
+        assert_eq!(Some(141), d.get_distance(&belfast, &dublin));
+    }
+
+    #[test]
+    fn all_locations() {
+        let dublin = Location { name: "Dublin" };
+        let belfast = Location { name: "Belfast" };
+        let london = Location { name: "London" };
+
+        let d = DistanceGraph {
+            distances: vec![Distance {
+                                from: london,
+                                to: dublin,
+                                distance: 464,
+                            },
+                            Distance {
+                                from: london,
+                                to: belfast,
+                                distance: 518,
+                            },
+                            Distance {
+                                from: dublin,
+                                to: belfast,
+                                distance: 141,
+                            }],
+        };
+
+        let expected: HashSet<&Location> = vec![&dublin, &belfast, &london]
+                                               .into_iter()
+                                               .collect();
+        assert_eq!(expected, d.all_locations());
     }
 }
