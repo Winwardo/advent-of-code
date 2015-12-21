@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 #[derive(Copy, Clone)]
 pub struct Location<'a> {
     name: &'a str,
@@ -26,11 +28,13 @@ impl<'a> DistanceGraph<'a> {
         }
 
         let mut shortest = !0; // Infinity
+        let mut queue = VecDeque::new();
+
+        // Populate the queue with all initial locations
         for distance in self.distances.iter() {
-            if distance.distance < shortest {
-                shortest = distance.distance;
-            }
+            queue.push_back(distance);
         }
+
         shortest
     }
 
@@ -42,6 +46,15 @@ impl<'a> DistanceGraph<'a> {
             }
         }
         connections
+    }
+
+    pub fn get_distance(&self, from: &'a Location, to: &'a Location) -> u32 {
+        for distance in self.connected_locations(&from) {
+            if (distance.from == *to) || (distance.to == *to) {
+                return distance.distance;
+            }
+        }
+        panic!("Non existent distance");
     }
 }
 
@@ -111,29 +124,6 @@ mod test {
     }
 
     #[test]
-    fn three_branching_lines_makes_a_Y_shape() {
-        let d = DistanceGraph {
-            distances: vec![Distance {
-                                from: Location { name: "A" },
-                                to: Location { name: "B" },
-                                distance: 10,
-                            },
-                            Distance {
-                                from: Location { name: "B" },
-                                to: Location { name: "C" },
-                                distance: 20,
-                            },
-                            Distance {
-                                from: Location { name: "B" },
-                                to: Location { name: "D" },
-                                distance: 5,
-                            }],
-        };
-
-        assert_eq!(15, d.shortest_distance());
-    }
-
-    #[test]
     fn lines_as_in_example() {
         let d = DistanceGraph {
             distances: vec![Distance {
@@ -154,29 +144,6 @@ mod test {
         };
 
         assert_eq!(605, d.shortest_distance());
-    }
-
-    #[test]
-    fn three_disjoint_lines() {
-        let d = DistanceGraph {
-            distances: vec![Distance {
-                                from: Location { name: "A" },
-                                to: Location { name: "B" },
-                                distance: 10,
-                            },
-                            Distance {
-                                from: Location { name: "C" },
-                                to: Location { name: "D" },
-                                distance: 20,
-                            },
-                            Distance {
-                                from: Location { name: "E" },
-                                to: Location { name: "F" },
-                                distance: 5,
-                            }],
-        };
-
-        assert_eq!(5, d.shortest_distance());
     }
 
     #[test]
@@ -258,5 +225,31 @@ mod test {
         };
 
         assert_eq!(1, d.connected_locations(&test_location).len());
+    }
+
+    #[test]
+    fn get_distance_between_locations() {
+        let dublin = Location { name: "Dublin" };
+        let belfast = Location { name: "Belfast" };
+
+        let d = DistanceGraph {
+            distances: vec![Distance {
+                                from: Location { name: "London" },
+                                to: Location { name: "Dublin" },
+                                distance: 464,
+                            },
+                            Distance {
+                                from: Location { name: "London" },
+                                to: Location { name: "Belfast" },
+                                distance: 518,
+                            },
+                            Distance {
+                                from: dublin,
+                                to: belfast,
+                                distance: 141,
+                            }],
+        };
+
+        assert_eq!(141, d.get_distance(&belfast, &dublin));
     }
 }
