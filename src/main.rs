@@ -1,4 +1,5 @@
 extern crate regex;
+extern crate permutohedron;
 
 mod file_reading;
 

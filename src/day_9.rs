@@ -1,5 +1,6 @@
 use std::cmp;
 use std::collections::HashSet;
+use permutohedron::*;
 
 #[derive(Copy, Clone, Debug, Eq, Hash)]
 pub struct Location<'a> {
@@ -29,40 +30,38 @@ impl<'a> DistanceGraph<'a> {
         }
 
         let mut shortest = !0; // Infinity
-        // let mut queue = VecDeque::new();
 
-        // Populate the queue with all initial locations
-        let all_locations = self.all_locations();
+        let n = self.permutations();
 
-        // let q = all_locations.permutations();
+        for perm in n {
+            let mut i1 = perm.iter();
+            let mut i2 = perm.iter().skip(1);
 
-        let mut all_iter = all_locations.iter();
-        let mut iter2 = all_locations.iter();
+            let mut distance = 0;
 
-        for from in all_iter {
-            for to in iter2.clone() {
-                if from == to {
-                    continue;
+            for to in i2 {
+                let from = i1.next().unwrap();
+                match self.get_distance(&from, &to) {
+                    Some(x) => distance += x,
+                    None => {} 
                 }
-
-                // println!("{:?}, {:?}", from, to);
-                let dist = self.compute_shortest_distance_between(&from, &to);
-                shortest = cmp::min(shortest, dist);
             }
+            shortest = cmp::min(shortest, distance);
         }
 
         shortest
     }
 
-    fn compute_shortest_distance_between(&self, from: &'a Location, to: &'a Location) -> u32 {
-        match self.get_distance(&from, &to) {
-            Some(x) => {
-                return x;
-            }
-            None => {}
-        }
+    fn permutations(&self) -> Vec<Vec<&'a Location>> {
+        let mut perms = Vec::new();
 
-        !0
+        let mut data: Vec<&Location> = self.all_locations().into_iter().collect();
+        let mut permutations = Heap::new(&mut data[..]);
+
+        while let Some(x) = permutations.next_permutation() {
+            perms.push(x.to_owned());
+        }
+        perms
     }
 
     pub fn all_locations(&self) -> HashSet<&'a Location> {
@@ -119,47 +118,6 @@ mod test {
         };
 
         assert_eq!(10, d.shortest_distance());
-    }
-
-    #[test]
-    fn two_connected_lines() {
-        let d = DistanceGraph {
-            distances: vec![Distance {
-                                from: Location { name: "A" },
-                                to: Location { name: "B" },
-                                distance: 10,
-                            },
-                            Distance {
-                                from: Location { name: "B" },
-                                to: Location { name: "C" },
-                                distance: 20,
-                            }],
-        };
-
-        assert_eq!(30, d.shortest_distance());
-    }
-
-    #[test]
-    fn three_connected_lines() {
-        let d = DistanceGraph {
-            distances: vec![Distance {
-                                from: Location { name: "A" },
-                                to: Location { name: "B" },
-                                distance: 10,
-                            },
-                            Distance {
-                                from: Location { name: "B" },
-                                to: Location { name: "C" },
-                                distance: 20,
-                            },
-                            Distance {
-                                from: Location { name: "C" },
-                                to: Location { name: "D" },
-                                distance: 5,
-                            }],
-        };
-
-        assert_eq!(35, d.shortest_distance());
     }
 
     #[test]
