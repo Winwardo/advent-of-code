@@ -1,3 +1,4 @@
+use std::cmp;
 use std::collections::HashSet;
 
 #[derive(Copy, Clone, Debug, Eq, Hash)]
@@ -31,8 +32,23 @@ impl<'a> DistanceGraph<'a> {
         // let mut queue = VecDeque::new();
 
         // Populate the queue with all initial locations
-        for distance in self.distances.iter() {
-            // for
+        let all_locations = self.all_locations();
+
+        // let q = all_locations.permutations();
+
+        let mut all_iter = all_locations.iter();
+        let mut iter2 = all_locations.iter();
+
+        for from in all_iter {
+            for to in iter2.clone() {
+                if from == to {
+                    continue;
+                }
+
+                // println!("{:?}, {:?}", from, to);
+                let dist = self.compute_shortest_distance_between(&from, &to);
+                shortest = cmp::min(shortest, dist);
+            }
         }
 
         shortest
