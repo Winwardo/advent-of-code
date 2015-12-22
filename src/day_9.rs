@@ -1,3 +1,4 @@
+use regex::Regex;
 use std::cmp;
 use std::collections::HashSet;
 use permutohedron::*;
@@ -13,10 +14,40 @@ impl<'a> PartialEq for Location<'a> {
     }
 }
 
+#[derive(Clone)]
 pub struct Distance<'a> {
     from: Location<'a>,
     to: Location<'a>,
     distance: u32,
+}
+
+pub struct Distances<'a> {
+    distances: Vec<Distance<'a>>,
+}
+
+impl<'a> Distances<'a> {
+    pub fn new() -> Distances<'a> {
+        Distances { distances: vec![] }
+    }
+
+    pub fn add(&mut self, to_parse: &'a str) {
+        let re = Regex::new(r"(.*) to (.*) = (.*)").unwrap();
+        for cap in re.captures_iter(to_parse) {
+            let from = cap.at(1).unwrap();
+            let to = cap.at(2).unwrap();
+            let distance = cap.at(3).unwrap().parse::<u32>().unwrap();
+
+            self.distances.push(Distance {
+                from: Location { name: &from },
+                to: Location { name: &to },
+                distance: distance,
+            });
+        }
+    }
+
+    pub fn get_all(&self) -> &Vec<Distance<'a>> {
+        &self.distances
+    }
 }
 
 pub struct DistanceGraph<'a> {
@@ -278,5 +309,18 @@ mod test {
                                                .into_iter()
                                                .collect();
         assert_eq!(expected, d.all_locations());
+    }
+
+
+    #[test]
+    fn lines_as_in_example_using_text_input() {
+        let mut distances = Distances::new();
+        distances.add("London to Dublin = 464");
+        distances.add("London to Belfast = 518");
+        distances.add("Dublin to Belfast = 141");
+
+        let d = DistanceGraph { distances: (*distances.get_all()).clone() };
+
+        assert_eq!(605, d.shortest_distance());
     }
 }
