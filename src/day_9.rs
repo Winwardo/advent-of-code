@@ -86,7 +86,7 @@ impl DistanceGraph {
             return 0;
         }
 
-        let mut shortest = !0; // Infinity
+        let mut shortest = 0; // Infinity
 
         let n = self.permutations();
 
@@ -103,7 +103,7 @@ impl DistanceGraph {
                     None => {} 
                 }
             }
-            shortest = cmp::min(shortest, distance);
+            shortest = cmp::max(shortest, distance);
         }
 
         shortest
