@@ -1,3 +1,5 @@
+use regex::Regex;
+
 pub fn print_answer() {
     use file_reading::*;
     let input = read_file_as_lines("res\\day_10.txt");
@@ -25,7 +27,42 @@ impl LookAndSay {
 impl Iterator for LookAndSay {
     type Item = String;
     fn next(&mut self) -> Option<String> {
-        None
+        fn try_print_character(new_string: &mut Vec<char>, count: u32, last_digit: char) {
+            if count > 0 {
+                new_string.push(match count {
+                    1 => '1',
+                    2 => '2',
+                    3 => '3',
+                    4 => '4',
+                    5 => '5',
+                    6 => '6',
+                    7 => '7',
+                    8 => '8',
+                    9 => '9',
+                    _ => 'a',
+                });
+                new_string.push(last_digit);
+            }
+        }
+
+        let mut last_digit = '0';
+        let mut count = 0;
+        let mut new_string = vec![];
+
+        for c in self.current_val.chars() {
+            if c != last_digit {
+                try_print_character(&mut new_string, count, last_digit);
+                last_digit = c;
+                count = 1;
+            } else {
+                count += 1;
+            }
+        }
+
+        try_print_character(&mut new_string, count, last_digit);
+
+        self.current_val = new_string.into_iter().collect();
+        Some(self.current_val.clone())
     }
 }
 
