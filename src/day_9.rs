@@ -3,58 +3,84 @@ use std::cmp;
 use std::collections::HashSet;
 use permutohedron::*;
 
-#[derive(Copy, Clone, Debug, Eq, Hash)]
-pub struct Location<'a> {
-    name: &'a str,
+pub fn print_answer() {
+    use file_reading::*;
+    let input = read_file_as_lines("res\\day_9.txt");
+
+    let mut lines: Vec<String> = Vec::new();
+    let mut distances = Distances::new();
+
+    for line in input {
+        // lines.push(line.clone());
+        distances.add(&line);
+    }
+    // for line in lines {
+    // for x in 0..lines.len() {
+    // distances.add(*(lines.get(x).unwrap()));
+    // }
+
+    let distance_graph = DistanceGraph { distances: distances.get_all().clone() };
+    let answer = distance_graph.shortest_distance();
+    println!("{:?}", answer);
 }
 
-impl<'a> PartialEq for Location<'a> {
+
+#[derive(Clone, Debug, Eq, Hash)]
+pub struct Location {
+    name: String,
+}
+
+impl PartialEq for Location {
     fn eq(&self, other: &Self) -> bool {
         self.name == other.name
     }
 }
 
 #[derive(Clone)]
-pub struct Distance<'a> {
-    from: Location<'a>,
-    to: Location<'a>,
+pub struct Distance {
+    from: Location,
+    to: Location,
     distance: u32,
 }
 
-pub struct Distances<'a> {
-    distances: Vec<Distance<'a>>,
+pub struct Distances {
+    strings: Vec<&'static str>,
+    distances: Vec<Distance>,
 }
 
-impl<'a> Distances<'a> {
-    pub fn new() -> Distances<'a> {
-        Distances { distances: vec![] }
+impl Distances {
+    pub fn new() -> Distances {
+        Distances {
+            strings: vec![],
+            distances: vec![],
+        }
     }
 
-    pub fn add(&mut self, to_parse: &'a str) {
+    pub fn add(&mut self, to_parse: &str) {
         let re = Regex::new(r"(.*) to (.*) = (.*)").unwrap();
-        for cap in re.captures_iter(to_parse) {
+        for cap in re.captures_iter(&to_parse) {
             let from = cap.at(1).unwrap();
             let to = cap.at(2).unwrap();
             let distance = cap.at(3).unwrap().parse::<u32>().unwrap();
 
             self.distances.push(Distance {
-                from: Location { name: &from },
-                to: Location { name: &to },
+                from: Location { name: from.to_string() },
+                to: Location { name: to.to_string() },
                 distance: distance,
             });
         }
     }
 
-    pub fn get_all(&self) -> &Vec<Distance<'a>> {
+    pub fn get_all(&self) -> &Vec<Distance> {
         &self.distances
     }
 }
 
-pub struct DistanceGraph<'a> {
-    distances: Vec<Distance<'a>>,
+pub struct DistanceGraph {
+    distances: Vec<Distance>,
 }
 
-impl<'a> DistanceGraph<'a> {
+impl DistanceGraph {
     pub fn shortest_distance(&self) -> u32 {
         if self.distances.len() == 0 {
             return 0;
@@ -83,7 +109,7 @@ impl<'a> DistanceGraph<'a> {
         shortest
     }
 
-    fn permutations(&self) -> Vec<Vec<&'a Location>> {
+    fn permutations(&self) -> Vec<Vec<&Location>> {
         let mut perms = Vec::new();
 
         let mut data: Vec<&Location> = self.all_locations().into_iter().collect();
@@ -95,8 +121,8 @@ impl<'a> DistanceGraph<'a> {
         perms
     }
 
-    pub fn all_locations(&self) -> HashSet<&'a Location> {
-        let mut set: HashSet<&'a Location> = HashSet::new();
+    pub fn all_locations(&self) -> HashSet<&Location> {
+        let mut set: HashSet<&Location> = HashSet::new();
 
         for distance in self.distances.iter() {
             set.insert(&distance.from);
@@ -106,8 +132,8 @@ impl<'a> DistanceGraph<'a> {
         set
     }
 
-    pub fn connected_locations(&self, location: &'a Location) -> Vec<&'a Distance> {
-        let mut connections: Vec<&'a Distance> = Vec::new();
+    pub fn connected_locations(&self, location: &Location) -> Vec<&Distance> {
+        let mut connections: Vec<&Distance> = Vec::new();
         for distance in self.distances.iter() {
             if (distance.from == *location) || (distance.to == *location) {
                 connections.push(distance);
@@ -116,7 +142,7 @@ impl<'a> DistanceGraph<'a> {
         connections
     }
 
-    pub fn get_distance(&self, from: &'a Location, to: &'a Location) -> Option<u32> {
+    pub fn get_distance(&self, from: &Location, to: &Location) -> Option<u32> {
         for distance in self.connected_locations(&from) {
             if (distance.from == *to) || (distance.to == *to) {
                 return Some(distance.distance);
@@ -142,8 +168,8 @@ mod test {
     fn trivial_case() {
         let d = DistanceGraph {
             distances: vec![Distance {
-                                from: Location { name: "A" },
-                                to: Location { name: "B" },
+                                from: Location { name: "A".to_string() },
+                                to: Location { name: "B".to_string() },
                                 distance: 10,
                             }],
         };
@@ -155,18 +181,18 @@ mod test {
     fn lines_as_in_example() {
         let d = DistanceGraph {
             distances: vec![Distance {
-                                from: Location { name: "London" },
-                                to: Location { name: "Dublin" },
+                                from: Location { name: "London".to_string() },
+                                to: Location { name: "Dublin".to_string() },
                                 distance: 464,
                             },
                             Distance {
-                                from: Location { name: "London" },
-                                to: Location { name: "Belfast" },
+                                from: Location { name: "London".to_string() },
+                                to: Location { name: "Belfast".to_string() },
                                 distance: 518,
                             },
                             Distance {
-                                from: Location { name: "Dublin" },
-                                to: Location { name: "Belfast" },
+                                from: Location { name: "Dublin".to_string() },
+                                to: Location { name: "Belfast".to_string() },
                                 distance: 141,
                             }],
         };
@@ -178,13 +204,13 @@ mod test {
     fn one_place_two_lines() {
         let d = DistanceGraph {
             distances: vec![Distance {
-                                from: Location { name: "A" },
-                                to: Location { name: "B" },
+                                from: Location { name: "A".to_string() },
+                                to: Location { name: "B".to_string() },
                                 distance: 10,
                             },
                             Distance {
-                                from: Location { name: "A" },
-                                to: Location { name: "C" },
+                                from: Location { name: "A".to_string() },
+                                to: Location { name: "C".to_string() },
                                 distance: 7,
                             }],
         };
@@ -195,19 +221,19 @@ mod test {
     #[test]
     fn no_connected_locations() {
         let d = DistanceGraph { distances: vec![] };
-        let test_location = Location { name: "B" };
+        let test_location = Location { name: "B".to_string() };
 
         assert_eq!(0, d.connected_locations(&test_location).len());
     }
 
     #[test]
     fn one_connected_location() {
-        let test_location = Location { name: "A" };
+        let test_location = Location { name: "A".to_string() };
 
         let d = DistanceGraph {
             distances: vec![Distance {
-                                from: test_location,
-                                to: Location { name: "B" },
+                                from: test_location.clone(),
+                                to: Location { name: "B".to_string() },
                                 distance: 10,
                             }],
         };
@@ -217,22 +243,22 @@ mod test {
 
     #[test]
     fn two_connected_locations_one_dud() {
-        let test_location = Location { name: "A" };
+        let test_location = Location { name: "A".to_string() };
 
         let d = DistanceGraph {
             distances: vec![Distance {
-                                from: test_location,
-                                to: Location { name: "B" },
+                                from: test_location.clone(),
+                                to: Location { name: "B".to_string() },
                                 distance: 10,
                             },
                             Distance {
-                                from: test_location,
-                                to: Location { name: "C" },
+                                from: test_location.clone(),
+                                to: Location { name: "C".to_string() },
                                 distance: 10,
                             },
                             Distance {
-                                from: Location { name: "Q" },
-                                to: Location { name: "B" },
+                                from: Location { name: "Q".to_string() },
+                                to: Location { name: "B".to_string() },
                                 distance: 10,
                             }],
         };
@@ -242,12 +268,12 @@ mod test {
 
     #[test]
     fn one_reverse_connected_location() {
-        let test_location = Location { name: "A" };
+        let test_location = Location { name: "A".to_string() };
 
         let d = DistanceGraph {
             distances: vec![Distance {
-                                from: Location { name: "B" },
-                                to: test_location,
+                                from: Location { name: "B".to_string() },
+                                to: test_location.clone(),
                                 distance: 10,
                             }],
         };
@@ -257,23 +283,23 @@ mod test {
 
     #[test]
     fn get_distance_between_locations() {
-        let dublin = Location { name: "Dublin" };
-        let belfast = Location { name: "Belfast" };
+        let dublin = Location { name: "Dublin".to_string() };
+        let belfast = Location { name: "Belfast".to_string() };
 
         let d = DistanceGraph {
             distances: vec![Distance {
-                                from: Location { name: "London" },
-                                to: Location { name: "Dublin" },
+                                from: Location { name: "London".to_string() },
+                                to: Location { name: "Dublin".to_string() },
                                 distance: 464,
                             },
                             Distance {
-                                from: Location { name: "London" },
-                                to: Location { name: "Belfast" },
+                                from: Location { name: "London".to_string() },
+                                to: Location { name: "Belfast".to_string() },
                                 distance: 518,
                             },
                             Distance {
-                                from: dublin,
-                                to: belfast,
+                                from: dublin.clone(),
+                                to: belfast.clone(),
                                 distance: 141,
                             }],
         };
@@ -283,24 +309,24 @@ mod test {
 
     #[test]
     fn all_locations() {
-        let dublin = Location { name: "Dublin" };
-        let belfast = Location { name: "Belfast" };
-        let london = Location { name: "London" };
+        let dublin = Location { name: "Dublin".to_string() };
+        let belfast = Location { name: "Belfast".to_string() };
+        let london = Location { name: "London".to_string() };
 
         let d = DistanceGraph {
             distances: vec![Distance {
-                                from: london,
-                                to: dublin,
+                                from: london.clone(),
+                                to: dublin.clone(),
                                 distance: 464,
                             },
                             Distance {
-                                from: london,
-                                to: belfast,
+                                from: london.clone(),
+                                to: belfast.clone(),
                                 distance: 518,
                             },
                             Distance {
-                                from: dublin,
-                                to: belfast,
+                                from: dublin.clone(),
+                                to: belfast.clone(),
                                 distance: 141,
                             }],
         };
