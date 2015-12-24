@@ -13,6 +13,26 @@ pub fn does_not_contain_dangerous_letters(password: &str) -> bool {
     true
 }
 
+pub fn contains_two_different_non_overlapping_pairs(password: &str) -> bool {
+    let mut first_repeated_character: Option<u8> = None;
+
+    for pair in password.as_bytes().windows(2) {
+        if pair[0] == pair[1] {
+            let character = Some(pair[0]);
+
+            if first_repeated_character == None {
+                first_repeated_character = character;
+            } else {
+                if first_repeated_character != character {
+                    return true;
+                }
+            }
+        }
+    }
+
+    false
+}
+
 pub fn contains_straight(password: &str) -> bool {
     for triple in password.as_bytes().windows(3) {
         if is_straight((triple[0] as char, triple[1] as char, triple[2] as char)) {
@@ -62,5 +82,32 @@ mod test {
     #[test]
     fn contains_straight_negative_2() {
         assert_eq!(false, contains_straight("axbycz"));
+    }
+
+    #[test]
+    fn contains_two_pairs_true_1() {
+        assert_eq!(true, contains_two_different_non_overlapping_pairs("aabb"));
+    }
+
+    #[test]
+    fn contains_two_pairs_true_2() {
+        assert_eq!(true,
+                   contains_two_different_non_overlapping_pairs("helloworrld"));
+    }
+
+    #[test]
+    fn contains_two_pairs_false_1() {
+        assert_eq!(false, contains_two_different_non_overlapping_pairs("aaa"));
+    }
+
+    #[test]
+    fn contains_two_pairs_false_2() {
+        assert_eq!(false, contains_two_different_non_overlapping_pairs("aaaa"));
+    }
+
+    #[test]
+    fn contains_two_pairs_false3() {
+        assert_eq!(false,
+                   contains_two_different_non_overlapping_pairs("helloworld"));
     }
 }
