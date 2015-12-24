@@ -1,5 +1,9 @@
 pub fn print_answer() {}
 
+pub fn find_next_password(password: &str) -> String {
+    "".to_string()
+}
+
 pub fn increment_password(password: &str) -> String {
     let above_z = 'z' as u8 + 1;
 
@@ -18,8 +22,12 @@ pub fn increment_password(password: &str) -> String {
         }
     }
 
-
     String::from_utf8(bytes).unwrap()
+}
+
+pub fn is_valid_password(password: &str) -> bool {
+    does_not_contain_dangerous_letters(&password) &&
+    contains_two_different_non_overlapping_pairs(&password) && contains_straight(&password)
 }
 
 pub fn does_not_contain_dangerous_letters(password: &str) -> bool {
@@ -166,5 +174,30 @@ mod test {
     #[test]
     fn increment_password_long() {
         assert_eq!("baaaaa", increment_password("azzzzz"));
+    }
+
+    #[test]
+    fn is_valid_password_1() {
+        assert_eq!(false, is_valid_password("hijklmmn"));
+    }
+
+    #[test]
+    fn is_valid_password_2() {
+        assert_eq!(false, is_valid_password("abbceffg"));
+    }
+
+    #[test]
+    fn is_valid_password_3() {
+        assert_eq!(false, is_valid_password("abbcegjk"));
+    }
+
+    #[test]
+    fn is_valid_password_4() {
+        assert_eq!(true, is_valid_password("abcdffaa"));
+    }
+
+    #[test]
+    fn find_next_password_1() {
+        assert_eq!("abcdffaa", find_next_password("abcdefgh"));
     }
 }
