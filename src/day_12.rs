@@ -1,10 +1,20 @@
+use regex::Regex;
+
 pub fn print_answer() {
     let answer = "";
     println!("{:?}", answer);
 }
 
 pub fn get_sum(input: &str) -> i32 {
-    0
+    let mut sum = 0;
+    let re = Regex::new(r"(-?\d+)*").unwrap();
+    for cap in re.captures_iter(input) {
+        sum += match cap.at(0).unwrap().parse::<i32>() {
+            Ok(q) => q,
+            Err(_) => 0,
+        };
+    }
+    sum
 }
 
 #[cfg(test)]
