@@ -1,27 +1,20 @@
 pub fn print_answer() {}
 
 pub fn increment_password(password: &str) -> String {
-    println!("{:?}", password);
     let above_z = 'z' as u8 + 1;
-    let mut result = String::with_capacity(password.len());
 
     let mut bytes = password.as_bytes().to_owned();
-    // let final_byte = bytes[password.len() - 1];
-    // let incremented = final_byte + 1;
 
-    // increment final byte
-
+    // First increment the final character.
     let x = bytes.len() - 1;
     bytes[x] += 1;
 
-
-    for n in 1..bytes.len() {
-        let x = bytes.len() - n;
+    // Search backwards through the password for characters that
+    // have rolled over, and increment the previous character
+    for x in (1..bytes.len()).rev() {
         if bytes[x] == above_z {
             bytes[x] = 'a' as u8;
             bytes[x - 1] += 1;
-        } else {
-            // break;
         }
     }
 
@@ -163,6 +156,11 @@ mod test {
     #[test]
     fn increment_password_5() {
         assert_eq!("baa", increment_password("azz"));
+    }
+
+    #[test]
+    fn increment_password_middle() {
+        assert_eq!("azba", increment_password("azaz"));
     }
 
     #[test]
