@@ -1,17 +1,12 @@
 pub fn print_answer() {}
 
 pub fn contains_straight(password: &str) -> bool {
-    let mut iter_a = password.chars();
-    let mut iter_b = password.chars().skip(1);
-    let mut iter_c = password.chars().skip(2);
-
-    for c in iter_c {
-        let a = iter_a.next().unwrap();
-        let b = iter_b.next().unwrap();
-        if is_straight((a, b, c)) {
+    for triple in password.as_bytes().windows(3) {
+        if is_straight((triple[0] as char, triple[1] as char, triple[2] as char)) {
             return true;
         }
     }
+
     false
 }
 
