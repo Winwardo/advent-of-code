@@ -12,7 +12,8 @@ mod day_8;
 mod day_9;
 mod day_10;
 mod day_11;
+mod day_12;
 
 pub fn main() {
-    day_11::print_answer();
+    day_12::print_answer();
 }
