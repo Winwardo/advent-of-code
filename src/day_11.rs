@@ -1,4 +1,7 @@
-pub fn print_answer() {}
+pub fn print_answer() {
+    let answer = find_next_password("vzbxkghb");
+    println!("{:?}", answer);
+}
 
 pub fn find_next_password(password: &str) -> String {
     let mut new_password = password.to_string();
