@@ -1,5 +1,18 @@
 pub fn print_answer() {}
 
+pub fn does_not_contain_dangerous_letters(password: &str) -> bool {
+    for c in password.chars() {
+        match c {
+            'i' | 'o' | 'l' => {
+                return false;
+            }
+            _ => {}
+        }
+    }
+
+    true
+}
+
 pub fn contains_straight(password: &str) -> bool {
     for triple in password.as_bytes().windows(3) {
         if is_straight((triple[0] as char, triple[1] as char, triple[2] as char)) {
