@@ -1,7 +1,9 @@
 use regex::Regex;
 
 pub fn print_answer() {
-    let answer = "";
+    use file_reading::*;
+    let input = read_file("res\\day_12.txt");
+    let answer = get_sum(&input);
     println!("{:?}", answer);
 }
 
