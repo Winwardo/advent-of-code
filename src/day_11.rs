@@ -1,7 +1,11 @@
 pub fn print_answer() {}
 
 pub fn find_next_password(password: &str) -> String {
-    "".to_string()
+    let mut new_password = password.to_string();
+    while !is_valid_password(&new_password) {
+        new_password = increment_password(&new_password);
+    }
+    new_password
 }
 
 pub fn increment_password(password: &str) -> String {
