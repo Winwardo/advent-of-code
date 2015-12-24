@@ -6,8 +6,8 @@ pub fn print_answer() {
 
 pub fn find_next_password(password: &str) -> String {
     let mut new_password = password.to_string();
-    
-            new_password = increment_password(&new_password);
+
+    new_password = increment_password(&new_password);
     while !is_valid_password(&new_password) {
         new_password = increment_password(&new_password);
     }
