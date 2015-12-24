@@ -1,12 +1,23 @@
 pub fn print_answer() {}
 
 pub fn contains_straight(password: &str) -> bool {
+    let mut iter_a = password.chars();
+    let mut iter_b = password.chars().skip(1);
+    let mut iter_c = password.chars().skip(2);
+
+    for c in iter_c {
+        let a = iter_a.next().unwrap();
+        let b = iter_b.next().unwrap();
+        if is_straight((a, b, c)) {
+            return true;
+        }
+    }
     false
 }
 
 pub fn is_straight(triple: (char, char, char)) -> bool {
     let (a, b, c) = triple;
-    (b as u8 - a as u8) == 1 && (c as u8 - b as u8) == 1
+    (b as i8 - a as i8) == 1 && (c as i8 - b as i8) == 1
 }
 
 #[cfg(test)]
