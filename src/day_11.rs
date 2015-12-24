@@ -1,5 +1,34 @@
 pub fn print_answer() {}
 
+pub fn increment_password(password: &str) -> String {
+    println!("{:?}", password);
+    let above_z = 'z' as u8 + 1;
+    let mut result = String::with_capacity(password.len());
+
+    let mut bytes = password.as_bytes().to_owned();
+    // let final_byte = bytes[password.len() - 1];
+    // let incremented = final_byte + 1;
+
+    // increment final byte
+
+    let x = bytes.len() - 1;
+    bytes[x] += 1;
+
+
+    for n in 1..bytes.len() {
+        let x = bytes.len() - n;
+        if bytes[x] == above_z {
+            bytes[x] = 'a' as u8;
+            bytes[x - 1] += 1;
+        } else {
+            // break;
+        }
+    }
+
+
+    String::from_utf8(bytes).unwrap()
+}
+
 pub fn does_not_contain_dangerous_letters(password: &str) -> bool {
     for c in password.chars() {
         match c {
@@ -109,5 +138,35 @@ mod test {
     fn contains_two_pairs_false3() {
         assert_eq!(false,
                    contains_two_different_non_overlapping_pairs("helloworld"));
+    }
+
+    #[test]
+    fn increment_password_1() {
+        assert_eq!("xy", increment_password("xx"));
+    }
+
+    #[test]
+    fn increment_password_2() {
+        assert_eq!("xz", increment_password("xy"));
+    }
+
+    #[test]
+    fn increment_password_3() {
+        assert_eq!("ya", increment_password("xz"));
+    }
+
+    #[test]
+    fn increment_password_4() {
+        assert_eq!("yb", increment_password("ya"));
+    }
+
+    #[test]
+    fn increment_password_5() {
+        assert_eq!("baa", increment_password("azz"));
+    }
+
+    #[test]
+    fn increment_password_long() {
+        assert_eq!("baaaaa", increment_password("azzzzz"));
     }
 }
