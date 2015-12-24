@@ -1,17 +1,9 @@
 use regex::Regex;
 
 pub fn print_answer() {
-    use file_reading::*;
-    let input = read_file_as_lines("res\\day_10.txt");
-
-    // let mut circuit = Circuit::new();
-
-    for line in input {
-        // circuit.run_instruction(&line);
-    }
-
-    // let answer = circuit.get("a");
-    // println!("{:?}", answer);
+    let mut l = LookAndSay::new("3113322113");
+    let answer = l.skip(49).next().unwrap();
+    println!("{:?}", answer.len());
 }
 
 pub struct LookAndSay {
