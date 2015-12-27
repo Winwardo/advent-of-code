@@ -11,13 +11,8 @@ pub fn print_answer() {
     let mut distances = Distances::new();
 
     for line in input {
-        // lines.push(line.clone());
         distances.add(&line);
     }
-    // for line in lines {
-    // for x in 0..lines.len() {
-    // distances.add(*(lines.get(x).unwrap()));
-    // }
 
     let distance_graph = DistanceGraph { distances: distances.get_all().clone() };
     let answer = distance_graph.shortest_distance();
@@ -86,7 +81,7 @@ impl DistanceGraph {
             return 0;
         }
 
-        let mut shortest = 0; // Infinity
+        let mut shortest = !0; // Infinity
 
         let n = self.permutations();
 
@@ -103,7 +98,7 @@ impl DistanceGraph {
                     None => {} 
                 }
             }
-            shortest = cmp::max(shortest, distance);
+            shortest = cmp::min(shortest, distance);
         }
 
         shortest
