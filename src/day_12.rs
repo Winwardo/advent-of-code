@@ -66,4 +66,19 @@ mod test {
     fn count_object_with_negative() {
         assert_eq!(3, get_sum("{\"a\":{\"b\":4},\"c\":-1}"));
     }
+
+    #[test]
+    fn count_object_with_one_red_partially_ignored() {
+        assert_eq!(4, get_sum("[1,{\"c\":\"red\",\"b\":2},3]"));
+    }
+
+    #[test]
+    fn count_object_with_one_red_all_ignored() {
+        assert_eq!(0, get_sum("{\"d\":\"red\",\"e\":[1,2,3,4],\"f\":5}"));
+    }
+
+    #[test]
+    fn count_object_with_one_red_in_array_so_ignored() {
+        assert_eq!(6, get_sum("[1,\"red\",5]"));
+    }
 }
