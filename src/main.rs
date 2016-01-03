@@ -1,5 +1,6 @@
 extern crate regex;
 extern crate permutohedron;
+extern crate rustc_serialize;
 
 mod file_reading;
 

@@ -1,4 +1,5 @@
 use regex::Regex;
+use rustc_serialize::json::*;
 
 pub fn print_answer() {
     use file_reading::*;
@@ -7,14 +8,39 @@ pub fn print_answer() {
     println!("{:?}", answer);
 }
 
-pub fn get_sum(input: &str) -> i32 {
-    let mut sum = 0;
-    let re = Regex::new(r"(-?\d+)*").unwrap();
-    for cap in re.captures_iter(input) {
-        sum += match cap.at(0).unwrap().parse::<i32>() {
-            Ok(q) => q,
-            Err(_) => 0,
-        };
+pub fn get_sum(input: &str) -> i64 {
+    let data = Json::from_str(input).unwrap();
+    sum_from_json(data)
+}
+
+fn sum_from_json(json: Json) -> i64 {
+    let mut sum = 0i64;
+    match json {
+        Json::Array(a) => {
+            for object in a { 
+                sum += sum_from_json(object);
+            }
+        }
+        Json::Object(o) => {
+            for value in o.values() {
+                sum += sum_from_json(value.clone());
+            }
+        }
+        Json::Null => {
+            panic!("No nulls should be present.");
+        }
+        Json::I64(n) => {
+            sum += n as i64;
+        }
+        Json::U64(n) => {
+            sum += n as i64;
+        }
+        Json::F64(n) => {
+            sum += n as i64;
+        }
+        _ => {
+            println!("poo");
+        }
     }
     sum
 }

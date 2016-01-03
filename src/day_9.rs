@@ -95,7 +95,7 @@ impl DistanceGraph {
                 let from = i1.next().unwrap();
                 match self.get_distance(&from, &to) {
                     Some(x) => distance += x,
-                    None => {} 
+                    None => {}
                 }
             }
             shortest = cmp::min(shortest, distance);
