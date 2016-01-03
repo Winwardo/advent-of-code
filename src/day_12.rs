@@ -14,31 +14,33 @@ pub fn get_sum(input: &str) -> i64 {
 }
 
 fn sum_from_json(json: &Json) -> i64 {
-    let mut sum = 0i64;
     match json {
-        &Json::Array(ref a) => {
-            for object in a {
-                sum += sum_from_json(&object);
-            }
-        }
-        &Json::Object(ref o) => {
-            for value in o.values() {
-                sum += sum_from_json(value);
-            }
-        }
+        &Json::Array(ref a) => sum_array(a),
+        &Json::Object(ref o) => sum_object(o),
+        &Json::I64(n) => n as i64,
+        &Json::U64(n) => n as i64,
+        &Json::F64(n) => n as i64,
+        &Json::String(_) => 0,
+        &Json::Boolean(_) => 0,
         &Json::Null => {
             panic!("No nulls should be present.");
         }
-        &Json::I64(n) => {
-            sum += n as i64;
+    }
+}
+
+fn sum_array(array: &Array) -> i64 {
+    array.into_iter().map(|object| sum_from_json(&object)).fold(0, |sum, val| sum + val)
+}
+
+fn sum_object(object: &Object) -> i64 {
+    let mut sum = 0;
+    for json in object.values() {
+        match json {
+            &Json::String(ref s) if s == "red" => {
+                return 0;
+            }
+            json @ _ => sum += sum_from_json(&json),
         }
-        &Json::U64(n) => {
-            sum += n as i64;
-        }
-        &Json::F64(n) => {
-            sum += n as i64;
-        }
-        _ => {}
     }
     sum
 }
