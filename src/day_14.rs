@@ -1,8 +1,25 @@
 use regex::Regex;
 
+pub fn print_answer() {
+    use file_reading::*;
+    let input = read_file_as_lines("res\\day_14.txt");
+
+    let mut reindeers = Vec::new();
+    for line in input.iter() {
+        reindeers.push(Reindeer::from_str(&line));
+    }
+    let race = Race {
+    	reindeers: reindeers,
+    };
+
+    let answer = race.get_winning_distance_at(Seconds(2503.0));
+    println!("{:?}", answer);
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Kilometres(pub f32);
 pub struct KMs(pub f32);
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Seconds(pub f32);
 
 pub struct Reindeer {
@@ -39,7 +56,7 @@ impl Reindeer {
 
         let complete_runs = (time_limit_ / time).floor();
         let leftover_runs = (time_limit_ % time);
- 
+
         let l = if (leftover_runs > duration) {
             duration
         } else {
@@ -49,6 +66,24 @@ impl Reindeer {
         let answer = (l + complete_runs * duration) * kms;
 
         Kilometres(answer)
+    }
+}
+
+pub struct Race {
+    reindeers: Vec<Reindeer>,
+}
+
+impl Race {
+    pub fn get_winning_distance_at(&self, time: Seconds) -> Kilometres {
+        let mut max_distance = 0.0;
+        for reindeer in self.reindeers.iter() {
+            let Kilometres(distance) = reindeer.distance_after(time);
+            if distance > max_distance {
+                max_distance = distance;
+            }
+        }
+
+        Kilometres(max_distance)
     }
 }
 
@@ -96,5 +131,18 @@ mod test {
         let comet = Reindeer::from_str("Comet can fly 14 km/s for 10 seconds, but then must rest \
                                         for 127 seconds.");
         assert_eq!(Kilometres(1120.0), comet.distance_after(Seconds(1000.0)));
+    }
+
+    #[test]
+    fn race_comet_and_dancer() {
+        let comet = Reindeer::from_str("Comet can fly 14 km/s for 10 seconds, but then must rest \
+                                        for 127 seconds.");
+        let dancer = Reindeer::from_str("Dancer can fly 16 km/s for 11 seconds, but then must \
+                                         rest for 162 seconds.");
+
+        let race = Race { reindeers: vec![comet, dancer] };
+
+        assert_eq!(Kilometres(1120.0),
+                   race.get_winning_distance_at(Seconds(1000.0)));
     }
 }

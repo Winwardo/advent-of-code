@@ -18,5 +18,5 @@ mod day_13;
 mod day_14;
 
 pub fn main() {
-    day_13::print_answer();
+    day_14::print_answer();
 }
