@@ -17,23 +17,26 @@ pub fn print_answer() {
 }
 
 pub type Happiness = i32;
-pub struct SeatingTriple {
-    left: String,
-    right: String,
+pub struct SeatingTriple<'a> {
+    left: &'a str,
+    right: &'a str,
     happiness: Happiness,
 }
 
-pub struct SeatingArrangement {
-    people: HashSet<String>,
-    scores: Vec<SeatingTriple>,
+pub struct SeatingArrangement<'a> {
+    people: HashSet<&'a str>,
+    scores: Vec<SeatingTriple<'a>>,
 }
 
-impl SeatingArrangement {
-    pub fn new() -> SeatingArrangement {
-        SeatingArrangement { people: HashSet::new(),scores: Vec::new() }
+impl<'a> SeatingArrangement<'a> {
+    pub fn new() -> SeatingArrangement<'a> {
+        SeatingArrangement {
+            people: HashSet::new(),
+            scores: Vec::new(),
+        }
     }
 
-    pub fn insert_line(&mut self, line: &str) {
+    pub fn insert_line(&mut self, line: &'a str) {
         let re = Regex::new(r"(.+?) would (.+?) (\d+?) happiness units by sitting next to (.+?)\.")
                      .unwrap();
         for cap in re.captures_iter(&line) {
@@ -52,16 +55,16 @@ impl SeatingArrangement {
             let score = value.parse::<Happiness>().ok().expect("Should be a number") * modifier;
 
             self.insert(SeatingTriple {
-                left: left.to_owned(),
-                right: right.to_owned(),
+                left: left,
+                right: right,
                 happiness: score,
             });
         }
     }
 
-    fn insert(&mut self, triple: SeatingTriple) {
-        self.people.insert(triple.left.clone());
-        self.people.insert(triple.right.clone());
+    fn insert(&mut self, triple: SeatingTriple<'a>) {
+        self.people.insert(&triple.left);
+        self.people.insert(&triple.right);
         self.scores.push(triple);
     }
 
@@ -70,10 +73,10 @@ impl SeatingArrangement {
         let mut exists = false;
 
         for &SeatingTriple {ref left, ref right, happiness} in self.scores.iter() {
-            if left == f_left && right == f_right {
+            if *left == f_left && *right == f_right {
                 exists = true;
                 score += happiness;
-            } else if left == f_right && right == f_left {
+            } else if *left == f_right && *right == f_left {
                 exists = true;
                 score += happiness;
             }
@@ -89,12 +92,12 @@ impl SeatingArrangement {
     fn permutations(&self) -> Vec<Vec<&str>> {
         let mut perms = Vec::new();
 
-        let mut data:Vec<&str>  = Vec::new();
+        let mut data: Vec<&str> = Vec::new();
         for person in self.people.iter() {
             data.push(&person);
         }
 
-        let mut permutations = Heap::new(&mut data[..]); 
+        let mut permutations = Heap::new(&mut data[..]);
 
         while let Some(x) = permutations.next_permutation() {
             perms.push(x.to_owned());
@@ -135,7 +138,7 @@ impl SeatingArrangement {
 mod test {
     use super::*;
 
-    fn get_seating_arrangement() -> SeatingArrangement {
+    fn get_seating_arrangement<'a>() -> SeatingArrangement<'a> {
         let mut sa = SeatingArrangement::new();
         sa.insert_line("Alice would gain 54 happiness units by sitting next to Bob.");
         sa.insert_line("Alice would lose 79 happiness units by sitting next to Carol.");
