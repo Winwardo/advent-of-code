@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-use regex::Regex;
 use permutohedron::*;
+use regex::Regex;
 use std::collections::HashSet;
 
 pub fn print_answer() {
@@ -72,13 +71,13 @@ impl<'a> SeatingArrangement<'a> {
         let mut score: Happiness = 0;
         let mut exists = false;
 
-        for &SeatingTriple {ref left, ref right, happiness} in self.scores.iter() {
-            if *left == f_left && *right == f_right {
+        for triple in self.scores.iter() {
+            if triple.left == f_left && triple.right == f_right {
                 exists = true;
-                score += happiness;
-            } else if *left == f_right && *right == f_left {
+                score += triple.happiness;
+            } else if triple.left == f_right && triple.right == f_left {
                 exists = true;
-                score += happiness;
+                score += triple.happiness;
             }
         }
 
@@ -89,20 +88,14 @@ impl<'a> SeatingArrangement<'a> {
         }
     }
 
+    fn people_list(&self) -> Vec<&str> {
+        self.people.iter().cloned().collect::<Vec<&str>>()
+    }
+
     fn permutations(&self) -> Vec<Vec<&str>> {
-        let mut perms = Vec::new();
+        let mut data = self.people_list();
 
-        let mut data: Vec<&str> = Vec::new();
-        for person in self.people.iter() {
-            data.push(&person);
-        }
-
-        let mut permutations = Heap::new(&mut data[..]);
-
-        while let Some(x) = permutations.next_permutation() {
-            perms.push(x.to_owned());
-        }
-        perms
+        Heap::new(&mut data[..]).collect::<Vec<Vec<&str>>>()
     }
 
     pub fn find_optimal(&self) -> i32 {
@@ -154,7 +147,6 @@ mod test {
         sa.insert_line("David would gain 41 happiness units by sitting next to Carol.");
         sa
     }
-
 
     #[test]
     fn fn_alice_david() {
