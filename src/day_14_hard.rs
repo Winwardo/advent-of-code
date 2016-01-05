@@ -1,4 +1,5 @@
 use regex::Regex;
+use std::cmp;
 
 pub fn print_answer() {
     use file_reading::*;
@@ -82,15 +83,7 @@ impl Race {
     }
 
     pub fn get_winning_points_at(&self, time: Seconds) -> i32 {
-        let mut top_score = 0;
-
-        for score in self.run_race(time) {
-            if score > top_score {
-                top_score = score;
-            }
-        }
-
-        top_score
+        self.run_race(time).iter().fold(0, |x, &y| cmp::max(x, y))
     }
 }
 
