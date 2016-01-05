@@ -8,9 +8,7 @@ pub fn print_answer() {
     for line in input.iter() {
         reindeers.push(Reindeer::from_str(&line));
     }
-    let race = Race {
-    	reindeers: reindeers,
-    };
+    let race = Race { reindeers: reindeers };
 
     let answer = race.get_winning_distance_at(Seconds(2503.0));
     println!("{:?}", answer);
