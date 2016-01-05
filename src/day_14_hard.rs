@@ -9,7 +9,7 @@ pub fn print_answer() {
     for line in input.iter() {
         reindeers.push(Reindeer::from_str(&line));
     }
-    let race = Race { reindeers: reindeers };
+    let mut race = Race::new(reindeers);
 
     let answer = race.get_winning_points_at((2503));
     println!("{:?}", answer);
@@ -43,49 +43,75 @@ impl Reindeer {
 
         panic!("Unparseable line")
     }
+
+    pub fn is_not_resting_at_time(&self, time: Seconds) -> bool {
+        let trunc_sec = time % (self.duration + self.rest);
+        trunc_sec < self.duration
+    }
 }
 
 pub struct Race {
     reindeers: Vec<Reindeer>,
+    distances: Vec<i32>,
+    scores: Vec<i32>,
+    current_time: i32,
 }
 
 impl Race {
     pub fn new(reindeers: Vec<Reindeer>) -> Race {
-        Race { reindeers: reindeers }
+        let len = reindeers.len();
+        Race {
+            reindeers: reindeers,
+            distances: vec![0;len],
+            scores: vec![0;len],
+            current_time: 0,
+        }
     }
 
-    pub fn run_race(&self, time: Seconds) -> Vec<i32> {
-        let mut scores = vec![0; self.reindeers.len()];
-        let mut distances = vec![0; self.reindeers.len()];
+    pub fn run_race(&mut self, time: Seconds) -> Vec<i32> {
+        for _ in 0..time {
+            self.tick();
+        }
 
-        for x in 0..time {
-            let mut winners = vec![];
-            let mut top_score = 0;
+        self.scores.clone()
+    }
 
-            for (i, reindeer) in self.reindeers.iter().enumerate() {
-                let trunc_sec = x % (reindeer.duration + reindeer.rest);
+    fn tick(&mut self) {
+        self.tick_reindeers();
+        self.update_scores();
 
-                if trunc_sec < reindeer.duration {
-                    distances[i] += reindeer.speed;
-                }
+        self.current_time += 1;
+    }
 
-                if distances[i] > top_score {
-                    winners = vec![i];
-                    top_score = distances[i];
-                } else if distances[i] == top_score {
-                    winners.push(i);
-                }
+    fn tick_reindeers(&mut self) {
+        for (i, reindeer) in self.reindeers.iter().enumerate() {
+            if reindeer.is_not_resting_at_time(self.current_time) {
+                self.distances[i] += reindeer.speed;
             }
+        }
+    }
 
-            for winner in winners {
-                scores[winner] += 1;
+    fn update_scores(&mut self) {
+        let mut winning_reindeer_ids = vec![];
+        let mut furthest_ran = 0;
+
+        for (i, _) in self.reindeers.iter().enumerate() {
+            let distance_covered = self.distances[i];
+
+            if distance_covered > furthest_ran {
+                winning_reindeer_ids = vec![i];
+                furthest_ran = distance_covered;
+            } else if distance_covered == furthest_ran {
+                winning_reindeer_ids.push(i);
             }
         }
 
-        scores
+        for winner in winning_reindeer_ids {
+            self.scores[winner] += 1;
+        }
     }
 
-    pub fn get_winning_points_at(&self, time: Seconds) -> i32 {
+    pub fn get_winning_points_at(&mut self, time: Seconds) -> i32 {
         self.run_race(time).iter().fold(0, |x, &y| cmp::max(x, y))
     }
 }
@@ -106,7 +132,7 @@ mod test {
 
     #[test]
     fn race_comet_and_dancer_get_scores_one_second() {
-        let race = make_race();
+        let mut race = make_race();
         let scores = race.run_race((1));
 
         assert_eq!(scores[0], 0);
@@ -115,7 +141,7 @@ mod test {
 
     #[test]
     fn race_comet_and_dancer_get_scores_140_seconds() {
-        let race = make_race();
+        let mut race = make_race();
         let scores = race.run_race((140));
 
         assert_eq!(scores[0], 1);
@@ -124,7 +150,7 @@ mod test {
 
     #[test]
     fn race_comet_and_dancer_get_scores_1000_seconds() {
-        let race = make_race();
+        let mut race = make_race();
         let scores = race.run_race((1000));
 
         assert_eq!(scores[0], 312);
@@ -133,7 +159,7 @@ mod test {
 
     #[test]
     fn race_comet_and_dancer_get_winning_points() {
-        let race = make_race();
+        let mut race = make_race();
 
         assert_eq!(689, race.get_winning_points_at((1000)));
     }
