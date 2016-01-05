@@ -53,10 +53,8 @@ impl Race {
     pub fn run_race(&self, time: Seconds) -> Vec<i32> {
         let mut scores = vec![0; self.reindeers.len()];
         let mut distances = vec![0; self.reindeers.len()];
-        let mut rest_left = vec![0; self.reindeers.len()];
 
-        let seconds = time;
-        for x in 0..seconds {
+        for x in 0..time {
             let mut winners = vec![];
             let mut top_score = 0;
             for (i, reindeer) in self.reindeers.iter().enumerate() {
